@@ -1,0 +1,19 @@
+﻿using DataAccess.Models.UserModels;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DataAccess.Models.SportsClubModels;
+
+[Table("Facility")]
+public class Facility : Entity
+{
+    [Required]
+    public ContactInfo ContactInfo { get; set; }
+
+    [Required]
+    public SportsClub SportsClub { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public string Location { get; set; }
+}

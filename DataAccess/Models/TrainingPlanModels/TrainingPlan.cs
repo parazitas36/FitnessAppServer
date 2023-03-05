@@ -1,0 +1,12 @@
+﻿using DataAccess.Models.UserModels;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DataAccess.Models.TrainingPlanModels;
+
+[Table("TrainingPlan")]
+public class TrainingPlan : Entity
+{
+    [Required]
+    public User CreatedBy { get; set; }
+}
