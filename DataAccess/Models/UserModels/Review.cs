@@ -19,4 +19,7 @@ public class Review : Entity
 
     [StringLength(100)]
     public string? ReviewText { get; set; }
+
+    [Required]
+    public DateTime CreatedDate { get; set; }
 }

@@ -14,6 +14,14 @@ public class Facility : Entity
     public SportsClub SportsClub { get; set; }
 
     [Required]
+    [StringLength(50)]
+    public string Country { get; set; }
+
+    [Required]
     [StringLength(100)]
-    public string Location { get; set; }
+    public string City { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public string Coordinates { get; set; }
 }

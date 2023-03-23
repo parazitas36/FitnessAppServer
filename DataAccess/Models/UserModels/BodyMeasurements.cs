@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models.UserModels;
 
-[Table("BodyProgress")]
-public class BodyProgress : Entity
+[Table("BodyMeasurements")]
+public class BodyMeasurements : Entity
 {
     [Required]
     public User User { get; set; }
@@ -22,4 +22,6 @@ public class BodyProgress : Entity
     
     [Required]
     public bool ImperialSystem { get; set; }
+
+    public string? PictureURI { get; set; }
 }

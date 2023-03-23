@@ -13,4 +13,6 @@ public class SportsClub : Entity
 
     [Required]
     public User Owner { get; set; }
+
+    public string? Description { get; set; }
 }

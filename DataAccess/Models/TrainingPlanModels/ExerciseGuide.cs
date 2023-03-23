@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models.TrainingPlanModels;
 
-[Table("Exercise")]
+[Table("ExerciseGuides")]
 public class ExerciseGuide : Entity
 {
     [Required]

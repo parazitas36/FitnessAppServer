@@ -25,4 +25,7 @@ public class TrainingPlanOffer : Entity
 
     [Required]
     public OfferStatus Status { get; set; }
+
+    [Required]
+    public DateTime OfferedDate { get; set; }
 }

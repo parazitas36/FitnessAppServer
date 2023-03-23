@@ -7,7 +7,7 @@ namespace DataAccess.Models.TrainingPlanModels;
 public class ExerciseProgress : Entity
 {
     [Required]
-    TrainingPlanExercise TrainingPlanExercise { get; set; }
+    public TrainingPlanExercise TrainingPlanExercise { get; set; }
 
     public DateTime? CompletionDate { get; set; }
 

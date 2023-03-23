@@ -18,8 +18,19 @@ public class TrainerJobForm : Entity
 
     [Required]
     [StringLength(50)]
-    public string Location { get; set; }
+    public string Country { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public string City { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    public string Coordinates { get; set; }
 
     [StringLength(250)]
     public string? OtherDetails { get; set; }
+
+    [Required]
+    public DateTime CreationDate { get; set; } = DateTime.Now;
 }

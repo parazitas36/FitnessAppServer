@@ -20,4 +20,7 @@ public class JobOffer : Entity
 
     [Required]
     public OfferStatus Status { get; set; }
+
+    [Required]
+    public DateTime OfferDate { get; set; } = DateTime.Now;
 }
