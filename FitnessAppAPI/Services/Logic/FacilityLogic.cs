@@ -35,9 +35,16 @@ public class FacilityLogic : IFacilityLogic
         }).ToList());
     }
 
-    public Task<List<Equipment>> GetFacilityEquipment(int facilityId)
+    public Task<List<EquipmentGetDto>> GetFacilityEquipment(int facilityId)
     {
-        return Task.FromResult(_dbContext.FacilitiesEquipment.Where(x => x.Facility.Id == facilityId).Select(x => x.Equipment).ToList());
+        return Task.FromResult(_dbContext.FacilitiesEquipment.Include(x => x.Equipment).Where(x => x.Facility.Id == facilityId).Select(x => new EquipmentGetDto
+        {
+            Name = x.Equipment.Name,
+            Description = x.Equipment.Description,
+            ImageURI = x.Equipment.ImageURI,
+            Amount = x.Amount,
+            FacilityId = facilityId
+        }).ToList());
     }
 
     public async Task<bool> CreateFacility(FacilityPostDto facility, int sportsClubId, int ownerId)
@@ -73,27 +80,6 @@ public class FacilityLogic : IFacilityLogic
         catch
         {
             return false;
-        }
-    }
-
-    public async Task<Equipment> CreateEquipment(EquipmentPostDto equipment)
-    {
-        try
-        {
-            var newEquipment = (await _dbContext.Equipment.AddAsync(new Equipment
-            {
-                Name = equipment.Name,
-                Description = equipment.Description,
-                ImageURI = equipment.ImageUri
-            })).Entity;
-
-            await _dbContext.SaveChangesAsync();
-
-            return newEquipment;
-        }
-        catch
-        {
-            return null;
         }
     }
 

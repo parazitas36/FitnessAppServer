@@ -17,4 +17,7 @@ public class Equipment : Entity
     [Required]
     [StringLength(100)]
     public string ImageURI { get; set; }
+
+    [Required]
+    public SportsClub SportsClub { get;set; }
 }

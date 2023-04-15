@@ -40,6 +40,7 @@ builder.Services.AddDbContext<FitnessAppDbContext>(options =>
 builder.Services.AddScoped<IUsersLogic, UsersLogic>();
 builder.Services.AddScoped<ISportsClubLogic, SportsClubLogic>();
 builder.Services.AddScoped<IFacilityLogic, FacilityLogic>();
+builder.Services.AddScoped<IExercisesLogic, ExercisesLogic>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

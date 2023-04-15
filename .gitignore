@@ -362,6 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /FitnessAppAPI/appsettings.Development.json
-/FitnessAppAPI/Services/Interfaces/IUsersLogic.cs
 /FitnessAppAPI/appsettings.json
 /FitnessAppAPI/Properties/launchSettings.json

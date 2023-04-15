@@ -1,4 +1,6 @@
-﻿using FitnessAppAPI.DTOs.SportsClub;
+﻿using DataAccess.Models.SportsClubModels;
+using FitnessAppAPI.DTOs.Equipment;
+using FitnessAppAPI.DTOs.SportsClub;
 
 namespace FitnessAppAPI.Services.Logic
 {
@@ -10,5 +12,7 @@ namespace FitnessAppAPI.Services.Logic
         Task<List<SubscriptionGetDto>> GetAllSubscriptions(int sportsClubId);
         Task<SportsClubGetDto?> GetSportsClubById(int id);
         Task<SportsClubGetDto?> GetUserSportsClub(int userId);
+        Task<List<Equipment>> GetSportsClubEquipment(int sportsClubId);
+        Task<Equipment> CreateEquipment(int sportsClubId, EquipmentPostDto equipment);
     }
 }
