@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DataAccess.Enumerators;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccess.Models.TrainingPlanModels;
@@ -12,11 +13,13 @@ public class TrainingPlanExercise : Entity
     [Required]
     public Exercise Exercise { get; set; }
 
-    [Required]
-    public DateTime ScheduledStartDate { get; set; }
+    public Days? Day { get; set; }
 
-    [Required]
-    public DateTime ScheduledEndDate { get; set; }
+    public int? Week { get; set; }
+
+    public DateTime? ScheduledStartDate { get; set; }
+
+    public DateTime? ScheduledEndDate { get; set; }
 
     [Required]
     [StringLength(50)]

@@ -29,6 +29,7 @@ public class FitnessAppDbContext : DbContext
     public DbSet<ExerciseGuide> ExerciseGuides { get; set; }
     public DbSet<ExerciseProgress> ExerciseProgress { get; set; }
     public DbSet<TrainingPlanExercise> TrainingPlanExercises { get; set; }
+    public DbSet<TrainingPlan> TrainingPlans { get; set; }
     public DbSet<BodyMeasurements> BodyMeasurements { get; set; }
     public DbSet<ContactInfo> ContactInfo { get; set; }
     public DbSet<User> Users { get; set; }

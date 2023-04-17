@@ -1,8 +1,8 @@
-﻿using FitnessAppAPI.DTOs.Exercise;
+﻿using DataAccess.Models.UserModels;
+using FitnessAppAPI.DTOs.Exercise;
 using FitnessAppAPI.Services.Helpers;
 using FitnessAppAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FitnessAppAPI.Controllers;
@@ -27,17 +27,38 @@ public class ExercisesController : ControllerBase
 
         if (userId != trainerId) { return Forbid(); }
 
-        return Ok(await _exercisesLogic.GetTrainersExerices(userId));
+        var result = await _exercisesLogic.GetTrainersExerices(userId);
+
+        return result != null ? Ok(result) : NotFound();
+    }
+
+    [HttpGet("{exerciseId:int}")]
+    public async Task<ActionResult<ExerciseWithGuideGetDto>> GetExerciseById(int exerciseId)
+    {
+        var result = await _exercisesLogic.GetExerciseById(exerciseId);
+
+        return result != null ? Ok(result) : NotFound();
     }
 
     [HttpPost]
     [Authorize(Roles = "Trainer")]
-    public async Task<ActionResult> CreateExercise([FromBody] ExercisePostDto dto)
+    [RequestSizeLimit(100_000_000)]
+    public async Task<ActionResult> CreateExercise([FromForm] ExerciseWithGuidePostDto dto)
     {
         var userId = JwtHelper.GetUserId(Request);
 
         bool isCreated = await _exercisesLogic.CreateExercise(userId, dto);
 
         return isCreated ? Created(nameof(ExerciseGetDto), null) : BadRequest();
+    }
+
+    [HttpGet("file/{path}")]
+    public async Task<IActionResult> GetFile(string path)
+    {
+        var ext = path.Contains(".mp4") ? "video/mp4" : "image/jpeg";
+        var dir = new DirectoryInfo("Files");
+        var f = dir.GetFiles().ToList();
+        FileStream stream = System.IO.File.Open(f.First(x => x.FullName.Contains(path)).FullName, FileMode.Open);
+        return File(stream, ext);
     }
 }

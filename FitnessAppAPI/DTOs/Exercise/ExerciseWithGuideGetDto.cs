@@ -2,7 +2,7 @@
 
 using DataAccess.Models.SportsClubModels;
 
-public class ExerciseGetDto
+public class ExerciseWithGuideGetDto
 {
     public int Id { get; set; }
     public int CreatedBy { get; set; }
@@ -10,5 +10,5 @@ public class ExerciseGetDto
     public string MuscleGroups { get; set; }
     public string ExerciseType { get; set; }
     public Equipment? Equipment { get; set; }
-    public bool HasGuide { get; set; }
+    public string? Guide { get; set; }
 }

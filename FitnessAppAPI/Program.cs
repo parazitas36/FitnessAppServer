@@ -2,6 +2,8 @@ using DataAccess.DatabaseContext;
 using FitnessAppAPI.Services.Interfaces;
 using FitnessAppAPI.Services.Logic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -41,6 +43,15 @@ builder.Services.AddScoped<IUsersLogic, UsersLogic>();
 builder.Services.AddScoped<ISportsClubLogic, SportsClubLogic>();
 builder.Services.AddScoped<IFacilityLogic, FacilityLogic>();
 builder.Services.AddScoped<IExercisesLogic, ExercisesLogic>();
+builder.Services.AddScoped<ITrainingPlanLogic, TrainingPlanLogic>();
+
+builder.Services.Configure<KestrelServerOptions>(options => options.Limits.MaxRequestBodySize = int.MaxValue);
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
