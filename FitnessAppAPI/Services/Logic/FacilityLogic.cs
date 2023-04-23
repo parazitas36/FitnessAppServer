@@ -39,6 +39,7 @@ public class FacilityLogic : IFacilityLogic
     {
         return Task.FromResult(_dbContext.FacilitiesEquipment.Include(x => x.Equipment).Where(x => x.Facility.Id == facilityId).Select(x => new EquipmentGetDto
         {
+            Id = x.Equipment.Id,
             Name = x.Equipment.Name,
             Description = x.Equipment.Description,
             ImageURI = x.Equipment.ImageURI,

@@ -4,6 +4,7 @@ using DataAccess.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(FitnessAppDbContext))]
-    partial class FitnessAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230422185910_UpdateTrainingPlan4")]
+    partial class UpdateTrainingPlan4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -570,6 +573,12 @@ namespace DataAccess.Migrations
 
                     b.Property<int>("ExerciseId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("ScheduledEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ScheduledStartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Sets")
                         .IsRequired()

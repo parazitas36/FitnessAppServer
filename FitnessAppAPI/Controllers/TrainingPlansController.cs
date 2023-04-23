@@ -19,6 +19,7 @@ namespace FitnessAppAPI.Controllers
         }
 
         [HttpGet("{trainerId:int}/short")]
+        [Authorize(Roles = "Trainer")]
         public async Task<IActionResult> GetTrainersTrainingPlansShort(int trainerId)
         {
             var userId = JwtHelper.GetUserId(Request);
@@ -38,6 +39,18 @@ namespace FitnessAppAPI.Controllers
             var result = await _trainingPlanLogic.CreateTrainingPlan(userId, dto);
 
             return result ? Created(nameof(TrainingPlanPostDto), null) : BadRequest();
+        }
+
+        [HttpGet("{trainingPlanId:int}")]
+        public async Task<IActionResult> GetTrainingPlanById(int trainingPlanId)
+        {
+            var userId = JwtHelper.GetUserId(Request);
+
+            bool trainer = true;
+
+            var result = await _trainingPlanLogic.GetTrainingPlanById(userId, trainingPlanId, trainer);
+
+            return result is null ? NotFound() : Ok(result);
         }
     }
 }

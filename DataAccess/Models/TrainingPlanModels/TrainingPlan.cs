@@ -14,7 +14,4 @@ public class TrainingPlan : Entity
     [Required]
     [StringLength(50)]
     public string Name { get; set; }
-
-    [Required]
-    public TrainingPlanType TrainingPlanType { get; set; }
 }

@@ -26,26 +26,13 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
             if (user == null) { return Task.FromResult(false).Result; }
 
-            TrainingPlanType trainingPlanType;
-
-            if (!Enum.TryParse<TrainingPlanType>(dto.Type, out trainingPlanType)) { return Task.FromResult(false).Result; }
-
             var createdTrainingPlan = (await _dbContext.TrainingPlans.AddAsync(new TrainingPlan
             {
                 CreatedBy = user,
                 Name = dto.Name,
-                TrainingPlanType = trainingPlanType,
             })).Entity;
 
-            switch (trainingPlanType)
-            {
-                case TrainingPlanType.Weekly:
-                    return Task.FromResult(await this.ProcessWeeklyTrainingPlan(dto, createdTrainingPlan)).Result;
-                case TrainingPlanType.Scheduled:
-                    return Task.FromResult(await this.ProcessScheduledTrainingPlan(dto, createdTrainingPlan)).Result;
-            }
-
-            return Task.FromResult(false).Result;
+            return Task.FromResult(await this.ProcessWeeklyTrainingPlan(dto, createdTrainingPlan)).Result;
         }
         catch
         {
@@ -57,64 +44,35 @@ public class TrainingPlanLogic : ITrainingPlanLogic
     {
         try
         {
-            var query = await (from trainingPlans in _dbContext.TrainingPlans.Where(x => x.CreatedBy.Id == trainerId)
-                               from tpExercises in _dbContext.TrainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlans.Id)
-                               from exercise in _dbContext.Exercises.Where(x => x.Id == tpExercises.Exercise.Id)
-                               from equipment in _dbContext.Equipment.Where(x => x.Id == exercise.Id).DefaultIfEmpty()
-                               select new TrainingPlanShortGetDto
-                               {
-                                   CreatedById = trainerId,
-                                   Name = trainingPlans.Name,
-                                   MuscleGroups = exercise.MuscleGroups,
-                                   ClientsCount = _dbContext.ClientTrainingPlans.Count(x => x.TrainingPlan.Id == trainingPlans.Id),
-                                   Type = trainingPlans.TrainingPlanType.ToString(),
-                               }).ToListAsync();
+            var trainingPlanExercises = await _dbContext.TrainingPlanExercises
+                .Include(x => x.TrainingPlan)
+                .Include(x => x.Exercise)
+                .Include(x => x.Exercise.Equipment)
+                .Where(x => x.TrainingPlan.CreatedBy.Id == trainerId).ToListAsync();
 
-            return Task.FromResult(query).Result;
+            var trainingPlans = new List<TrainingPlanShortGetDto>();
+            var uniqueTrainingPlans = trainingPlanExercises.DistinctBy(x => x.TrainingPlan.Id).Select(x => x.TrainingPlan).ToList();
+
+            foreach (var trainingPlan in uniqueTrainingPlans)
+            {
+                if (!trainingPlans.Any(x => x.Id == trainingPlan.Id))
+                {
+                    trainingPlans.Add(new TrainingPlanShortGetDto
+                    {
+                        Id = trainingPlan.Id,
+                        CreatedById = trainerId,
+                        Equipment = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.Equipment).Where(x => x is not null).Distinct().ToList(),
+                        MuscleGroups = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.MuscleGroups).Distinct().ToList(),
+                        Name = trainingPlan.Name,
+                    });
+                }
+            }
+
+            return Task.FromResult(trainingPlans).Result;
         }
         catch
         {
             return null;
-        }
-    }
-
-    private async Task<bool> ProcessScheduledTrainingPlan(TrainingPlanPostDto dto, TrainingPlan createdTrainingPlan)
-    {
-        try
-        {
-            var trainingPlanExercisesIds = new List<int>();
-
-            trainingPlanExercisesIds = dto.ScheduledPlan.Select(x => x.Id).Distinct().ToList();
-
-            var exercises = await _dbContext.Exercises.Where(x => trainingPlanExercisesIds.Contains(x.Id)).ToListAsync();
-
-            if (exercises.Count != trainingPlanExercisesIds.Count)
-            {
-                return Task.FromResult(false).Result;
-            }
-
-            var trainingPlanExercises = new List<TrainingPlanExercise>();
-
-            foreach (var exercise in dto.ScheduledPlan)
-            {
-                trainingPlanExercises.Add(new TrainingPlanExercise
-                {
-                    Exercise = exercises.First(x => x.Id == exercise.Id),
-                    ScheduledStartDate = Convert.ToDateTime(exercise.StartDate),
-                    ScheduledEndDate = Convert.ToDateTime(exercise.EndDate),
-                    Sets = exercise.Sets,
-                    TrainingPlan = createdTrainingPlan,
-                });
-            }
-
-            await _dbContext.AddRangeAsync(trainingPlanExercises);
-            await _dbContext.SaveChangesAsync();
-
-            return Task.FromResult(true).Result;
-        }
-        catch
-        {
-            return Task.FromResult(false).Result;
         }
     }
 
@@ -223,5 +181,110 @@ public class TrainingPlanLogic : ITrainingPlanLogic
         }
 
         return list;
+    }
+
+    public async Task<TrainingPlanGetDto?> GetTrainingPlanById(int userId, int trainingPlanId, bool trainer)
+    {
+        if (trainer == false)
+        {
+            var result = _dbContext.ClientTrainingPlans.FirstOrDefaultAsync(x => x.TrainingPlan.Id == trainingPlanId && x.Client.Id == userId);
+
+            if (result is null) { return null; }
+        }
+
+        List<TrainingPlanExercise> trainingPlanExercises = null;
+
+        if (trainer)
+        {
+            trainingPlanExercises = await _dbContext.TrainingPlanExercises.Include(x => x.TrainingPlan).Include(x => x.Exercise)
+                .Where(x => x.TrainingPlan.CreatedBy.Id == userId && x.TrainingPlan.Id == trainingPlanId).ToListAsync();
+        }
+        else
+        {
+            trainingPlanExercises = await _dbContext.TrainingPlanExercises.Include(x => x.TrainingPlan).Include(x => x.Exercise)
+                .Where(x => x.TrainingPlan.Id == trainingPlanId).ToListAsync();
+        }
+
+        if (trainingPlanExercises.IsNullOrEmpty()) { return null; }
+
+        List<int?> weeks = trainingPlanExercises.Select(x => x.Week).Distinct().ToList();
+
+        for (int i = 1; i < weeks.Last(); i++)
+        {
+            if (!weeks.Contains(i))
+            {
+                weeks.Add(i);
+            }
+        }
+
+        weeks = weeks.OrderBy(x => x).ToList();
+
+        List<WeeklyPlanWeekGetDto> weeklyPlan = new List<WeeklyPlanWeekGetDto>();
+
+        foreach (var week in weeks)
+        {
+            weeklyPlan.Add(new WeeklyPlanWeekGetDto
+            {
+                Week = (int)week,
+                Days = new WeeklyPlanDaysGetDto
+                {
+                    Monday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Monday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+
+                    Tuesday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Tuesday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+
+                    Wednesday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Wednesday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+
+                    Thursday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Thursday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+
+                    Friday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Friday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+
+                    Saturday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Saturday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+
+                    Sunday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Sunday).Select(x => new ExercisesWithSetsGetDto
+                    {
+                        TrainingPlanExerciseId = x.Id,
+                        ExerciseId = x.Exercise.Id,
+                        Sets = x.Sets
+                    }).ToList(),
+                },
+            });
+        }
+
+        return Task.FromResult(new TrainingPlanGetDto
+        {
+            Name = trainingPlanExercises.FirstOrDefault()?.TrainingPlan.Name,
+            TrainingPlanId = trainingPlanId,
+            WeeklyPlan = weeklyPlan
+        }).Result;
     }
 }

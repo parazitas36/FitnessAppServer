@@ -17,11 +17,7 @@ public class TrainingPlanExercise : Entity
 
     public int? Week { get; set; }
 
-    public DateTime? ScheduledStartDate { get; set; }
-
-    public DateTime? ScheduledEndDate { get; set; }
-
     [Required]
-    [StringLength(50)]
+    [StringLength(1024)]
     public string Sets { get; set; }
 }
