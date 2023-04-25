@@ -2,6 +2,7 @@
 using DataAccess.Models.SportsClubModels;
 using FitnessAppAPI.DTOs.Equipment;
 using FitnessAppAPI.DTOs.SportsClub;
+using FitnessAppAPI.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,11 +29,26 @@ public class SportsClubLogic : ISportsClubLogic
 
         try
         {
+            if (sportsClub.PhoneNumber != null || sportsClub.Email != null)
+            {
+                var contactInfo = await _dbContext.ContactInfo.AddAsync(new DataAccess.Models.UserModels.ContactInfo
+                {
+                    EmailAddress = sportsClub.Email,
+                    PhoneNumber = sportsClub.PhoneNumber,
+                });
+
+                owner.ContactInfo = contactInfo.Entity;
+                _dbContext.Users.Update(owner);
+            }
+
+            string logoUri = await FilesHandler.SaveFile(sportsClub.Logo);
+
             var newClub = (await _dbContext.SportsClubs.AddAsync(new SportsClub
             {
                 Owner = owner,
                 Name = sportsClub.Name,
-                Description = sportsClub.Description
+                Description = sportsClub.Description,
+                LogoUri = logoUri,
             })).Entity;
 
             await _dbContext.SaveChangesAsync();
@@ -41,7 +57,7 @@ public class SportsClubLogic : ISportsClubLogic
                 OwnerId = ownerId,
                 Name = sportsClub.Name,
                 Description = sportsClub.Description,
-                Id = newClub.Id
+                Id = newClub.Id,
             };
         }
         catch
@@ -50,28 +66,41 @@ public class SportsClubLogic : ISportsClubLogic
         }
     }
 
-    public Task<List<SportsClubGetDto>> GetAllSportsClubs(int page)
+    public async Task<List<SportsClubGetDto>> GetAllSportsClubs(int page)
     {
-        return Task.FromResult(_dbContext.SportsClubs.Skip((page - 1) * 50).Select(x => new SportsClubGetDto
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Description = x.Description,
-            OwnerId = x.Owner.Id
-        }).ToList());
+        return Task.FromResult(await _dbContext.SportsClubs.Skip((page - 1) * 50).Include(x => x.Owner).Include(x => x.Owner.ContactInfo)
+            .Select(x => new SportsClubGetDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                OwnerId = x.Owner.Id,
+                LogoUri = x.LogoUri,
+                TrainersCount = _dbContext.SportsClubTrainers.Where(y => y.SportsClub.Id == x.Id).Count(),
+                FacilitiesCount = _dbContext.Facilities.Where(y => y.SportsClub.Id == x.Id).Count(),
+                PhoneNumber = x.Owner.ContactInfo.PhoneNumber,
+                Email = x.Owner.Email
+            }).ToListAsync()).Result;
     }
 
     public async Task<SportsClubGetDto?> GetSportsClubById(int id)
     {
-        var sportsClub = await _dbContext.SportsClubs.Include(x => x.Owner).FirstOrDefaultAsync(x => x.Id == id);
+        var sportsClub = await _dbContext.SportsClubs.Include(x => x.Owner).Include(x => x.Owner.ContactInfo).Where(x => x.Id == id)
+            .Select(x => new SportsClubGetDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                OwnerId = x.Owner.Id,
+                LogoUri = x.LogoUri,
+                TrainersCount = _dbContext.SportsClubTrainers.Where(y => y.SportsClub.Id == x.Id).Count(),
+                FacilitiesCount = _dbContext.Facilities.Where(y => y.SportsClub.Id == x.Id).Count(),
+                PhoneNumber = x.Owner.ContactInfo.PhoneNumber,
+                Email = x.Owner.Email 
+            }).FirstOrDefaultAsync();
 
-        return sportsClub is null ? null : new SportsClubGetDto
-        {
-            Id = id,
-            Description = sportsClub.Description,
-            Name = sportsClub.Name,
-            OwnerId = sportsClub.Owner.Id
-        };
+
+        return Task.FromResult(sportsClub).Result;
     }
 
     public async Task<bool> CreateSubscription(SubscriptionPostDto dto, int sportsClubId, int userId)
@@ -111,7 +140,7 @@ public class SportsClubLogic : ISportsClubLogic
             Name = x.Name,
             Details = x.Details,
             Price = x.Price,
-            SportsClubId = sportsClubId
+            SportsClubId = sportsClubId,
         }).ToList();
 
         return Task.FromResult(result);
@@ -119,20 +148,21 @@ public class SportsClubLogic : ISportsClubLogic
 
     public async Task<SportsClubGetDto?> GetUserSportsClub(int userId)
     {
-        var result = await _dbContext.SportsClubs.FirstOrDefaultAsync(x => x.Owner.Id == userId);
+        var sportsClub = await _dbContext.SportsClubs.Include(x => x.Owner).Where(x => x.Owner.Id == userId).Include(x => x.Owner.ContactInfo)
+            .Select(x => new SportsClubGetDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                OwnerId = x.Owner.Id,
+                LogoUri = x.LogoUri,
+                TrainersCount = _dbContext.SportsClubTrainers.Where(y => y.SportsClub.Id == x.Id).Count(),
+                FacilitiesCount = _dbContext.Facilities.Where(y => y.SportsClub.Id == x.Id).Count(),
+                PhoneNumber = x.Owner.ContactInfo.PhoneNumber,
+                Email = x.Owner.Email
+            }).FirstOrDefaultAsync();
 
-        if (result == null)
-        {
-            return default;
-        }
-
-        return new SportsClubGetDto
-        {
-            Id = result.Id,
-            Description = result?.Description,
-            Name = result.Name,
-            OwnerId = userId
-        };
+        return Task.FromResult(sportsClub).Result;
     }
 
     public async Task<List<Equipment>> GetSportsClubEquipment(int sportsClubId)

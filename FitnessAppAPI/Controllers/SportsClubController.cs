@@ -41,7 +41,7 @@ public class SportsClubController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "SportsClubAdmin")]
-    public async Task<IActionResult> CreateSportsClub([FromBody] SportsClubPostDto body)
+    public async Task<IActionResult> CreateSportsClub([FromForm] SportsClubPostDto body)
     {
         var userId = JwtHelper.GetUserId(Request);
 

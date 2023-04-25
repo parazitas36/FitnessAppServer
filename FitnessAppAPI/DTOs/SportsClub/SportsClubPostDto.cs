@@ -8,5 +8,9 @@ public class SportsClubPostDto
 
     public string Description { get; set; }
 
-    public ContactInfoDto ContactInfo { get; set; }
+    public string? PhoneNumber { get; set; }
+
+    public string? Email { get; set; }
+    
+    public IFormFile Logo { get; set; }
 }

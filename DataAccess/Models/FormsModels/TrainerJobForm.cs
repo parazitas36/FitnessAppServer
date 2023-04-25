@@ -24,10 +24,6 @@ public class TrainerJobForm : Entity
     [StringLength(100)]
     public string City { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string Coordinates { get; set; }
-
     [StringLength(250)]
     public string? OtherDetails { get; set; }
 

@@ -15,4 +15,7 @@ public class SportsClub : Entity
     public User Owner { get; set; }
 
     public string? Description { get; set; }
+
+    [Required]
+    public string LogoUri { get; set; }
 }

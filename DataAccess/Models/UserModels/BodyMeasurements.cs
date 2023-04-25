@@ -18,7 +18,7 @@ public class BodyMeasurements : Entity
     public double? Hip { get; set; }
 
     [Required]
-    public DateTime MeasureMentDay { get; set; } = DateTime.Now;
+    public DateTime MeasurementDay { get; set; } = DateTime.Now;
     
     [Required]
     public bool ImperialSystem { get; set; }

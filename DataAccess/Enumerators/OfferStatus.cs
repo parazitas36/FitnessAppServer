@@ -3,7 +3,6 @@
 public enum OfferStatus
 {
     Offered,
-    Interested,
     Accepted,
     Declined
 }
