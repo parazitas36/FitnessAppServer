@@ -102,7 +102,7 @@ public class SportsClubController : ControllerBase
     }
 
     [HttpPost("{sportsClubId:int}/equipment")]
-    public async Task<ActionResult<Equipment>> CreateEquipment([FromBody] EquipmentPostDto body, int sportsClubId)
+    public async Task<ActionResult<Equipment>> CreateEquipment([FromForm] EquipmentPostDto body, int sportsClubId)
     {
         var sportsClub = await _sportsClubLogic.GetSportsClubById(sportsClubId);
 

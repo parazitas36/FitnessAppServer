@@ -89,19 +89,42 @@ public class FacilityLogic : IFacilityLogic
         var equipment = await _dbContext.Equipment.FirstOrDefaultAsync(x => x.Id == equipmentId);
         var facility = await _dbContext.Facilities.FirstOrDefaultAsync(x => x.Id == facilityId);
 
-        if (equipment == null || facility == null || amount < 1)
+        if (equipment == null || facility == null || amount < 0)
         {
             return false;
         }
 
+        var facilityEquipment = await _dbContext.FacilitiesEquipment.FirstOrDefaultAsync(x => x.Equipment.Id == equipmentId && x.Facility.Id == facilityId);
+
         try
         {
-            await _dbContext.FacilitiesEquipment.AddAsync(new FacilityEquipment
+            if (facilityEquipment == null && amount > 0)
             {
-                Facility = facility,
-                Equipment = equipment,
-                Amount = amount
-            });
+                await _dbContext.FacilitiesEquipment.AddAsync(new FacilityEquipment
+                {
+                    Facility = facility,
+                    Equipment = equipment,
+                    Amount = amount
+                });
+            }
+            else if(facilityEquipment != null)
+            {
+                if (amount > 0)
+                {
+                    facilityEquipment.Amount = 0;
+
+                    _dbContext.FacilitiesEquipment.Update(facilityEquipment);
+                }
+                else if (amount == 0)
+                {
+                    _dbContext.FacilitiesEquipment.Remove(facilityEquipment);
+                }
+                else { return false; }
+            }
+            else
+            {
+                return false;
+            }
 
             await _dbContext.SaveChangesAsync();
 

@@ -52,12 +52,18 @@ public class SportsClubLogic : ISportsClubLogic
             })).Entity;
 
             await _dbContext.SaveChangesAsync();
+
             return new SportsClubGetDto
             {
                 OwnerId = ownerId,
                 Name = sportsClub.Name,
                 Description = sportsClub.Description,
                 Id = newClub.Id,
+                LogoUri = logoUri,
+                FacilitiesCount = 0,
+                TrainersCount = 0,
+                Email = sportsClub.Email,
+                PhoneNumber= sportsClub.PhoneNumber,
             };
         }
         catch
@@ -176,13 +182,15 @@ public class SportsClubLogic : ISportsClubLogic
 
         if (sportsClub == null) { return null; }
 
+        var imageUri = await FilesHandler.SaveFile(equipment.Image);
+
         try
         {
             var newEquipment = (await _dbContext.Equipment.AddAsync(new Equipment
             {
                 Name = equipment.Name,
                 Description = equipment.Description,
-                ImageURI = equipment.ImageUri,
+                ImageURI = imageUri,
                 SportsClub = sportsClub,
             })).Entity;
 
