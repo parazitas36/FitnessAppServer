@@ -9,5 +9,5 @@ public class FacilityGetDto
     public int SportsClubId { get; set; }
     public string Country { get; set; }
     public string City { get; set; }
-    public string Coordinates { get; set; }
+    public string? ImageUri { get; set; }
 }

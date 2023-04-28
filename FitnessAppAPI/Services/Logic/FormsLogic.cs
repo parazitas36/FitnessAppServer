@@ -4,6 +4,7 @@ using DataAccess.DatabaseContext;
 using DataAccess.Models.FormsModels;
 using DataAccess.Models.UserModels;
 using FitnessAppAPI.DTOs.Forms;
+using FitnessAppAPI.Services.Helpers;
 using FitnessAppAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,8 @@ public class FormsLogic : IFormsLogic
 
         try
         {
+            var imageUri = await FilesHandler.SaveFile(dto.Image);
+
             var bodyMeasurements = new BodyMeasurements
             {
                 User = user,
@@ -33,6 +36,7 @@ public class FormsLogic : IFormsLogic
                 ImperialSystem = user.UsesImperialSystem,
                 Waist = dto.Waist,
                 MeasurementDay = DateTime.Now,
+                ImageUri = imageUri,
             };
 
             await _dbContext.BodyMeasurements.AddAsync(bodyMeasurements);
@@ -137,6 +141,7 @@ public class FormsLogic : IFormsLogic
             UserId = userId,
             Waist = x.Waist,
             Weight = x.Weight,
+            ImageUri = x.ImageUri
         }).ToListAsync();
 
         return Task.FromResult(result).Result;
@@ -219,8 +224,8 @@ public class FormsLogic : IFormsLogic
 
     public async Task<List<TrainingPlanFormGetDto>> GetUsersTrainingPlanForms(int userId)
     {
-        var result = await _dbContext.TrainingPlanForms.Where(x => x.CreatedBy.Id == userId)
-            .Include(x => x.CreatedBy)
+        var result = await _dbContext.TrainingPlanForms.Include(x => x.CreatedBy)
+            .Where(x => x.CreatedBy.Id == userId)?
             .Select(x => new TrainingPlanFormGetDto
             {
                 Id = x.Id,

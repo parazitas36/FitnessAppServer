@@ -30,7 +30,7 @@ namespace FitnessAppAPI.Controllers
 
         [HttpPost("bodymeasurements")]
         [Authorize(Roles = "User")]
-        public async Task<IActionResult> PostBodyMeasurements([FromBody] BodyMeasurementsPostDto dto)
+        public async Task<IActionResult> PostBodyMeasurements([FromForm] BodyMeasurementsPostDto dto)
         {
             var userId = JwtHelper.GetUserId(Request);
 

@@ -14,4 +14,6 @@ public class BodyMeasurementsGetDto
     public double? Hip { get; set; }
 
     public DateTime? MeasurementDay { get; set; }
+    
+    public string ImageUri { get; set; }
 }

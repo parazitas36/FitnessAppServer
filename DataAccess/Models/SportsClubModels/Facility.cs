@@ -23,5 +23,5 @@ public class Facility : Entity
 
     [Required]
     [StringLength(100)]
-    public string Coordinates { get; set; }
+    public string ImageUri { get; set; }
 }

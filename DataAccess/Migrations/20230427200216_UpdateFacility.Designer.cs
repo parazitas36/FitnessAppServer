@@ -4,6 +4,7 @@ using DataAccess.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(FitnessAppDbContext))]
-    partial class FitnessAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230427200216_UpdateFacility")]
+    partial class UpdateFacility
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -270,6 +273,11 @@ namespace DataAccess.Migrations
 
                     b.Property<int>("ContactInfoId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Coordinates")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Country")
                         .IsRequired()
@@ -604,14 +612,14 @@ namespace DataAccess.Migrations
                     b.Property<double?>("Hip")
                         .HasColumnType("float");
 
-                    b.Property<string>("ImageUri")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("ImperialSystem")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("MeasurementDay")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PictureURI")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

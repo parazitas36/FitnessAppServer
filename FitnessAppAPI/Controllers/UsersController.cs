@@ -1,5 +1,7 @@
 ﻿using FitnessAppAPI.DTOs.User;
+using FitnessAppAPI.Services.Helpers;
 using FitnessAppAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -60,6 +62,30 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<bool>> Register([FromBody] UserRegisterDto body)
     {
         bool result = await _usersLogic.Register(body);
+
+        return result ? Ok() : BadRequest();
+    }
+
+    [HttpGet("trainers")]
+    [Authorize]
+    public async Task<IActionResult> GetTrainers()
+    {
+        return Ok(await _usersLogic.GetTrainers());
+    }
+
+    [HttpGet("trainers/{trainerId:int}")]
+    [Authorize]
+    public async Task<IActionResult> GetTrainers(int trainerId)
+    {
+        var trainer = await _usersLogic.GetTrainerInfo(trainerId);
+        return trainer is null ? NotFound() : Ok(trainer);
+    }
+
+    [HttpPost("reviews")]
+    public async Task<IActionResult> PostReview([FromBody] ReviewPostDto dto)
+    {
+        var userId = JwtHelper.GetUserId(Request);
+        bool result = await _usersLogic.PostReview(userId, dto);
 
         return result ? Ok() : BadRequest();
     }

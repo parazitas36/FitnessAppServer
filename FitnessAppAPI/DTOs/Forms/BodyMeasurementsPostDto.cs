@@ -6,4 +6,5 @@ public class BodyMeasurementsPostDto
     public double? Bust { get; set; }
     public double? Waist { get; set; }
     public double? Hip { get; set; }
+    public IFormFile Image { get; set; }
 }

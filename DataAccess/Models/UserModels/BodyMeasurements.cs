@@ -23,5 +23,5 @@ public class BodyMeasurements : Entity
     [Required]
     public bool ImperialSystem { get; set; }
 
-    public string? PictureURI { get; set; }
+    public string? ImageUri { get; set; }
 }

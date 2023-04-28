@@ -1,5 +1,6 @@
 ﻿using DataAccess.DatabaseContext;
 using DataAccess.Enumerators;
+using DataAccess.Models.SportsClubModels;
 using DataAccess.Models.UserModels;
 using FitnessAppAPI.DTOs.User;
 using FitnessAppAPI.Services.Interfaces;
@@ -93,5 +94,117 @@ public class UsersLogic : IUsersLogic
         }
 
         return true;
+    }
+
+    public async Task<List<TrainerGetDto>> GetTrainers()
+    {
+        var trainers = await _dbContext.Users.Where(x => x.Role == Roles.Trainer)
+            .Select(x => new TrainerGetDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                LastName = x.Surname,
+                Username = x.Username,
+                Email = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).EmailAddress,
+                Phone = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).PhoneNumber,
+                AverageRating = _dbContext.Reviews.Where(y => y.Trainer.Id == x.Id).Average(y => y.Rating),
+                ReviewsCount = _dbContext.Reviews.Count(y => y.Trainer.Id == x.Id),
+            }).ToListAsync();
+
+        return Task.FromResult(trainers).Result;
+    }
+
+    public async Task<TrainerFullInfoGetDto?> GetTrainerInfo(int trainerId)
+    {
+        var trainer = await _dbContext.Users.Where(x => x.Id == trainerId)
+            .Select(x => new TrainerFullInfoGetDto
+            {
+                Trainer = new TrainerGetDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    LastName = x.Surname,
+                    Username = x.Username,
+                    Email = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).EmailAddress,
+                    Phone = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).PhoneNumber,
+                    AverageRating = _dbContext.Reviews.Where(y => y.Trainer.Id == x.Id).Average(y => y.Rating),
+                    ReviewsCount = _dbContext.Reviews.Count(y => y.Trainer.Id == x.Id),
+                },
+                Reviews = _dbContext.Reviews.Include(y => y.CreatedBy).Where(y => y.Trainer.Id == trainerId)
+                .Select(r => new ReviewGetDto
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                    Review = r.ReviewText,
+                    User = new UserShortGetDto
+                    {
+                        Id = r.CreatedBy.Id,
+                        Username = r.CreatedBy.Username
+                    }
+                }).ToList()
+            }).FirstOrDefaultAsync();
+
+        return Task.FromResult(trainer).Result;
+    }
+
+    public async Task<bool> PostReview(int userId, ReviewPostDto dto)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+        SportsClub? sportsClub = null;
+        User? trainer = null;
+
+        if (user == null) { return Task.FromResult(false).Result; }
+
+        if (dto.ReviewedSportsClubId != null)
+        {
+            sportsClub = await _dbContext.SportsClubs.FirstOrDefaultAsync(x => x.Id == dto.ReviewedSportsClubId);
+        }
+        else if (dto.ReviewedTrainerId != null)
+        {
+            trainer = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == dto.ReviewedTrainerId);
+        }
+
+        if (trainer == null && sportsClub == null) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            var review = new Review
+            {
+                CreatedDate = DateTime.Now,
+                CreatedBy = user,
+                Rating = dto.Rating,
+                ReviewText = dto.ReviewText,
+                SportsClub = sportsClub,
+                Trainer = trainer,
+            };
+
+            var existing = await _dbContext.Reviews.Where(x =>
+                x.CreatedBy.Id == userId &&
+                ((trainer != null && trainer.Id == x.Trainer.Id) || (sportsClub != null && sportsClub.Id == x.SportsClub.Id)))
+                .FirstOrDefaultAsync();
+                
+
+            if (existing != null)
+            {
+                existing.CreatedDate = review.CreatedDate;
+                existing.Rating = review.Rating;
+                existing.ReviewText = review.ReviewText;
+
+                _dbContext.Reviews.Update(existing);
+                await _dbContext.SaveChangesAsync();
+
+                return Task.FromResult(true).Result;
+            }
+
+            await _dbContext.Reviews.AddAsync(review);
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
     }
 }

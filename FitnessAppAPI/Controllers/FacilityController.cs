@@ -25,7 +25,7 @@ public class FacilityController : ControllerBase
 
     [HttpPost("sportsclub/{sportsClubId:int}/facility")]
     [Authorize(Roles = "SportsClubAdmin")]
-    public async Task<ActionResult> CreateFacility(int sportsClubId, [FromBody] FacilityPostDto body)
+    public async Task<ActionResult> CreateFacility(int sportsClubId, [FromForm] FacilityPostDto body)
     {
         var userId = JwtHelper.GetUserId(Request);
 

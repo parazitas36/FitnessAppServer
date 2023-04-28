@@ -4,6 +4,7 @@ using DataAccess.Models.UserModels;
 using FitnessAppAPI.DTOs.Equipment;
 using FitnessAppAPI.DTOs.Facility;
 using FitnessAppAPI.DTOs.User;
+using FitnessAppAPI.Services.Helpers;
 using FitnessAppAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,14 +25,14 @@ public class FacilityLogic : IFacilityLogic
         {
             Id = y.Id,
             City = y.City,
-            Coordinates = y.Coordinates,
             Country = y.Country,
             SportsClubId = sportsClubId,
             ContactInfo = new ContactInfoDto
             {
                 Email = y.ContactInfo.EmailAddress,
                 PhoneNumber = y.ContactInfo.PhoneNumber,
-            }
+            },
+            ImageUri = y.ImageUri,
         }).ToList());
     }
 
@@ -61,17 +62,19 @@ public class FacilityLogic : IFacilityLogic
         {
             var contactInfo = (await _dbContext.ContactInfo.AddAsync(new ContactInfo
             {
-                EmailAddress = facility.ContactInfo.Email,
-                PhoneNumber = facility.ContactInfo.PhoneNumber
+                EmailAddress = facility.Email,
+                PhoneNumber = facility.PhoneNumber
             })).Entity;
+
+            var imageUri = await FilesHandler.SaveFile(facility.Image);
 
             await _dbContext.Facilities.AddAsync(new Facility
             {
                 City = facility.City,
                 ContactInfo = contactInfo,
-                Coordinates = facility.Coordinates,
                 Country = facility.Country,
                 SportsClub = sportsClub,
+                ImageUri = imageUri,
             });
 
             await _dbContext.SaveChangesAsync();
@@ -111,7 +114,7 @@ public class FacilityLogic : IFacilityLogic
             {
                 if (amount > 0)
                 {
-                    facilityEquipment.Amount = 0;
+                    facilityEquipment.Amount = amount;
 
                     _dbContext.FacilitiesEquipment.Update(facilityEquipment);
                 }
