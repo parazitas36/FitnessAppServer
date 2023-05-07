@@ -9,4 +9,5 @@ public class TrainingPlanShortGetDto
     public string Name { get; set; }
     public List<string> MuscleGroups { get; set; }
     public List<Equipment>? Equipment { get; set; }
+    public string AssignedTo { get; set; }
 }

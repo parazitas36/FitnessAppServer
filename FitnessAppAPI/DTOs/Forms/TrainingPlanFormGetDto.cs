@@ -6,4 +6,5 @@ public class TrainingPlanFormGetDto
     public int UserId { get; set; }
     public string Username { get; set; }
     public string FormDetails { get; set; }
+    public bool? Offered { get; set; }
 }

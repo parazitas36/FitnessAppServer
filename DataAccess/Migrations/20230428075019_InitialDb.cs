@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDatabase : Migration
+    public partial class InitialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,21 +23,6 @@ namespace DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ContactInfo", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Equipment",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    ImageURI = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Equipment", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,9 +63,9 @@ namespace DataAccess.Migrations
                     Bust = table.Column<double>(type: "float", nullable: true),
                     Waist = table.Column<double>(type: "float", nullable: true),
                     Hip = table.Column<double>(type: "float", nullable: true),
-                    MeasureMentDay = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MeasurementDay = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ImperialSystem = table.Column<bool>(type: "bit", nullable: false),
-                    PictureURI = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ImageUri = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,60 +73,6 @@ namespace DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_BodyMeasurements_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Chat",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    User1Id = table.Column<int>(type: "int", nullable: false),
-                    User2Id = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Chat", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Chat_User_User1Id",
-                        column: x => x.User1Id,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Chat_User_User2Id",
-                        column: x => x.User2Id,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Exercise",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedById = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    MuscleGroups = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ExerciseType = table.Column<int>(type: "int", nullable: false),
-                    EquipmentId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Exercise", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Exercise_Equipment_EquipmentId",
-                        column: x => x.EquipmentId,
-                        principalTable: "Equipment",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Exercise_User_CreatedById",
-                        column: x => x.CreatedById,
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -176,7 +107,8 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     OwnerId = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LogoUri = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -198,7 +130,8 @@ namespace DataAccess.Migrations
                     TrainerId = table.Column<int>(type: "int", nullable: false),
                     Education = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     PersonalAchievements = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    Location = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     OtherDetails = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -219,7 +152,8 @@ namespace DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedById = table.Column<int>(type: "int", nullable: false)
+                    CreatedById = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -253,21 +187,23 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExerciseGuides",
+                name: "Equipment",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExerciseId = table.Column<int>(type: "int", nullable: false),
-                    Guide = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    ImageURI = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SportsClubId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExerciseGuides", x => x.Id);
+                    table.PrimaryKey("PK_Equipment", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ExerciseGuides_Exercise_ExerciseId",
-                        column: x => x.ExerciseId,
-                        principalTable: "Exercise",
+                        name: "FK_Equipment_SportsClub_SportsClubId",
+                        column: x => x.SportsClubId,
+                        principalTable: "SportsClub",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -280,7 +216,9 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ContactInfoId = table.Column<int>(type: "int", nullable: false),
                     SportsClubId = table.Column<int>(type: "int", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Country = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ImageUri = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -437,35 +375,6 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TrainingPlan_Exercise",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TrainingPlanId = table.Column<int>(type: "int", nullable: false),
-                    ExerciseId = table.Column<int>(type: "int", nullable: false),
-                    ScheduledStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ScheduledEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Sets = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TrainingPlan_Exercise", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TrainingPlan_Exercise_Exercise_ExerciseId",
-                        column: x => x.ExerciseId,
-                        principalTable: "Exercise",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TrainingPlan_Exercise_TrainingPlan_TrainingPlanId",
-                        column: x => x.TrainingPlanId,
-                        principalTable: "TrainingPlan",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TrainingPlanOffer",
                 columns: table => new
                 {
@@ -491,6 +400,34 @@ namespace DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_TrainingPlanOffer_User_TrainerId",
                         column: x => x.TrainerId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Exercise",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedById = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    MuscleGroups = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ExerciseType = table.Column<int>(type: "int", nullable: false),
+                    EquipmentId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Exercise", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Exercise_Equipment_EquipmentId",
+                        column: x => x.EquipmentId,
+                        principalTable: "Equipment",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Exercise_User_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -550,6 +487,55 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ExerciseGuides",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ExerciseId = table.Column<int>(type: "int", nullable: false),
+                    Guide = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExerciseGuides", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExerciseGuides_Exercise_ExerciseId",
+                        column: x => x.ExerciseId,
+                        principalTable: "Exercise",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainingPlan_Exercise",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TrainingPlanId = table.Column<int>(type: "int", nullable: false),
+                    ExerciseId = table.Column<int>(type: "int", nullable: false),
+                    Day = table.Column<int>(type: "int", nullable: true),
+                    Week = table.Column<int>(type: "int", nullable: true),
+                    Sets = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainingPlan_Exercise", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TrainingPlan_Exercise_Exercise_ExerciseId",
+                        column: x => x.ExerciseId,
+                        principalTable: "Exercise",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TrainingPlan_Exercise_TrainingPlan_TrainingPlanId",
+                        column: x => x.TrainingPlanId,
+                        principalTable: "TrainingPlan",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ExerciseProgress",
                 columns: table => new
                 {
@@ -570,55 +556,10 @@ namespace DataAccess.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Message",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ChatId = table.Column<int>(type: "int", nullable: false),
-                    SentById = table.Column<int>(type: "int", nullable: false),
-                    SentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExerciseProgressId = table.Column<int>(type: "int", nullable: true),
-                    Text = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    MessageType = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Message", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Message_Chat_ChatId",
-                        column: x => x.ChatId,
-                        principalTable: "Chat",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Message_ExerciseProgress_ExerciseProgressId",
-                        column: x => x.ExerciseProgressId,
-                        principalTable: "ExerciseProgress",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Message_User_SentById",
-                        column: x => x.SentById,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_BodyMeasurements_UserId",
                 table: "BodyMeasurements",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Chat_User1Id",
-                table: "Chat",
-                column: "User1Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Chat_User2Id",
-                table: "Chat",
-                column: "User2Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Client_TrainingPlan_ClientId",
@@ -629,6 +570,11 @@ namespace DataAccess.Migrations
                 name: "IX_Client_TrainingPlan_TrainingPlanId",
                 table: "Client_TrainingPlan",
                 column: "TrainingPlanId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Equipment_SportsClubId",
+                table: "Equipment",
+                column: "SportsClubId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Exercise_CreatedById",
@@ -679,21 +625,6 @@ namespace DataAccess.Migrations
                 name: "IX_JobOffer_TrainerJobFormId",
                 table: "JobOffer",
                 column: "TrainerJobFormId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Message_ChatId",
-                table: "Message",
-                column: "ChatId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Message_ExerciseProgressId",
-                table: "Message",
-                column: "ExerciseProgressId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Message_SentById",
-                table: "Message",
-                column: "SentById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PasswordReset_UserId",
@@ -799,13 +730,13 @@ namespace DataAccess.Migrations
                 name: "ExerciseGuides");
 
             migrationBuilder.DropTable(
+                name: "ExerciseProgress");
+
+            migrationBuilder.DropTable(
                 name: "FacilityEquipment");
 
             migrationBuilder.DropTable(
                 name: "JobOffer");
-
-            migrationBuilder.DropTable(
-                name: "Message");
 
             migrationBuilder.DropTable(
                 name: "PasswordReset");
@@ -823,13 +754,10 @@ namespace DataAccess.Migrations
                 name: "TrainingPlanOffer");
 
             migrationBuilder.DropTable(
+                name: "TrainingPlan_Exercise");
+
+            migrationBuilder.DropTable(
                 name: "TrainerJobForm");
-
-            migrationBuilder.DropTable(
-                name: "Chat");
-
-            migrationBuilder.DropTable(
-                name: "ExerciseProgress");
 
             migrationBuilder.DropTable(
                 name: "Facility");
@@ -841,12 +769,6 @@ namespace DataAccess.Migrations
                 name: "TrainingPlanForm");
 
             migrationBuilder.DropTable(
-                name: "TrainingPlan_Exercise");
-
-            migrationBuilder.DropTable(
-                name: "SportsClub");
-
-            migrationBuilder.DropTable(
                 name: "Exercise");
 
             migrationBuilder.DropTable(
@@ -854,6 +776,9 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Equipment");
+
+            migrationBuilder.DropTable(
+                name: "SportsClub");
 
             migrationBuilder.DropTable(
                 name: "User");

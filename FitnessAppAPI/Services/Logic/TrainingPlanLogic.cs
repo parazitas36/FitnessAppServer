@@ -52,6 +52,13 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
             var trainingPlans = new List<TrainingPlanShortGetDto>();
             var uniqueTrainingPlans = trainingPlanExercises.DistinctBy(x => x.TrainingPlan.Id).Select(x => x.TrainingPlan).ToList();
+            var uniqueIds = uniqueTrainingPlans.Select(x => x.Id).ToList();
+
+            var assignedTrainingPlans = await _dbContext.ClientTrainingPlans
+                .Include(x => x.TrainingPlan)
+                .Include(x => x.Client)
+                .Where(x => uniqueIds.Contains(x.TrainingPlan.Id))
+                .ToListAsync();
 
             foreach (var trainingPlan in uniqueTrainingPlans)
             {
@@ -61,6 +68,47 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                     {
                         Id = trainingPlan.Id,
                         CreatedById = trainerId,
+                        Equipment = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.Equipment).Where(x => x is not null).Distinct().ToList(),
+                        MuscleGroups = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.MuscleGroups).Distinct().ToList(),
+                        Name = trainingPlan.Name,
+                        AssignedTo = assignedTrainingPlans.FirstOrDefault(x => x.TrainingPlan.Id == trainingPlan.Id)?.Client.Username
+                    });
+                }
+            }
+
+            return Task.FromResult(trainingPlans).Result;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<List<TrainingPlanShortGetDto>> GetUsersTrainingPlanShortList(int userId)
+    {
+        try
+        {
+            var trainingPlanExercises = await _dbContext.TrainingPlanExercises
+                .Include(x => x.TrainingPlan)
+                .Include(x => x.Exercise)
+                .Include(x => x.Exercise.Equipment)
+                .Include(x => x.TrainingPlan.CreatedBy)
+                .Where(x => 
+                    _dbContext.ClientTrainingPlans
+                    .FirstOrDefault(y => y.TrainingPlan.Id == x.TrainingPlan.Id && y.Client.Id == userId).TrainingPlan.Id == x.TrainingPlan.Id)
+                .ToListAsync();
+
+            var trainingPlans = new List<TrainingPlanShortGetDto>();
+            var uniqueTrainingPlans = trainingPlanExercises.DistinctBy(x => x.TrainingPlan.Id).Select(x => x.TrainingPlan).ToList();
+
+            foreach (var trainingPlan in uniqueTrainingPlans)
+            {
+                if (!trainingPlans.Any(x => x.Id == trainingPlan.Id))
+                {
+                    trainingPlans.Add(new TrainingPlanShortGetDto
+                    {
+                        Id = trainingPlan.Id,
+                        CreatedById = trainingPlan.CreatedBy.Id,
                         Equipment = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.Equipment).Where(x => x is not null).Distinct().ToList(),
                         MuscleGroups = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.MuscleGroups).Distinct().ToList(),
                         Name = trainingPlan.Name,
@@ -286,5 +334,34 @@ public class TrainingPlanLogic : ITrainingPlanLogic
             TrainingPlanId = trainingPlanId,
             WeeklyPlan = weeklyPlan
         }).Result;
+    }
+
+    public async Task<bool> AssignTrainingPlan(int trainerId, int clientId, int trainingPlanId)
+    {
+        var client = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == clientId);
+
+        if (client == null) { return Task.FromResult(false).Result; }
+
+        var trainingPlan = await _dbContext.TrainingPlans.FirstOrDefaultAsync(x => x.CreatedBy.Id == trainerId && x.Id == trainingPlanId);
+
+        if (trainingPlan == null) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            var clientTrainingPlan = new ClientTrainingPlan
+            {
+                Client = client,
+                TrainingPlan = trainingPlan
+            };
+
+            await _dbContext.ClientTrainingPlans.AddAsync(clientTrainingPlan);
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
     }
 }

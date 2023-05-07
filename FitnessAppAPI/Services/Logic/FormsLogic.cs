@@ -1,6 +1,7 @@
 ﻿namespace FitnessAppAPI.Services.Logic;
 
 using DataAccess.DatabaseContext;
+using DataAccess.Enumerators;
 using DataAccess.Models.FormsModels;
 using DataAccess.Models.UserModels;
 using FitnessAppAPI.DTOs.Forms;
@@ -25,14 +26,21 @@ public class FormsLogic : IFormsLogic
 
         try
         {
-            var imageUri = await FilesHandler.SaveFile(dto.Image);
+            string? imageUri = null;
+            
+            if (dto.Image != null)
+            {
+                imageUri = await FilesHandler.SaveFile(dto.Image);
+            }
 
             var bodyMeasurements = new BodyMeasurements
             {
                 User = user,
-                Bust = dto.Bust,
+                Chest = dto.Chest,
+                Shoulders = dto.Shoulders,
+                Height = dto.Height,
                 Weight = dto.Weight,
-                Hip = dto.Hip,
+                Hips = dto.Hips,
                 ImperialSystem = user.UsesImperialSystem,
                 Waist = dto.Waist,
                 MeasurementDay = DateTime.Now,
@@ -57,13 +65,24 @@ public class FormsLogic : IFormsLogic
 
         try
         {
-            var trainingPlanForm = new TrainingPlanForm
-            {
-                FormDetails = dto.FormDetails,
-                CreatedBy = user,
-            };
+            var existingTrainingPlanForm = await _dbContext.TrainingPlanForms.FirstOrDefaultAsync(x => x.CreatedBy.Id == userId);
 
-            await _dbContext.TrainingPlanForms.AddAsync(trainingPlanForm);
+            if (existingTrainingPlanForm != null)
+            {
+                existingTrainingPlanForm.FormDetails = dto.FormDetails;
+                _dbContext.TrainingPlanForms.Update(existingTrainingPlanForm);
+            }
+            else
+            {
+                var trainingPlanForm = new TrainingPlanForm
+                {
+                    FormDetails = dto.FormDetails,
+                    CreatedBy = user,
+                };
+
+                await _dbContext.TrainingPlanForms.AddAsync(trainingPlanForm);
+            }
+            
             await _dbContext.SaveChangesAsync();
             return Task.FromResult(true).Result;
         }
@@ -136,13 +155,15 @@ public class FormsLogic : IFormsLogic
         {
             Id = x.Id,
             MeasurementDay = x.MeasurementDay,
-            Bust = x.Bust,
-            Hip = x.Hip,
+            Chest = x.Chest,
+            Hips = x.Hips,
+            Height = x.Height,
+            Shoulders = x.Shoulders,
             UserId = userId,
             Waist = x.Waist,
             Weight = x.Weight,
             ImageUri = x.ImageUri
-        }).ToListAsync();
+        }).OrderByDescending(x => x.MeasurementDay).ToListAsync();
 
         return Task.FromResult(result).Result;
     }
@@ -237,7 +258,7 @@ public class FormsLogic : IFormsLogic
         return Task.FromResult(result).Result;
     }
 
-    public async Task<List<TrainingPlanFormGetDto>> GetTrainingPlanForms()
+    public async Task<List<TrainingPlanFormGetDto>> GetTrainingPlanForms(int trainerId)
     {
         var result = await _dbContext.TrainingPlanForms
             .Include(x => x.CreatedBy)
@@ -246,9 +267,141 @@ public class FormsLogic : IFormsLogic
                 Id = x.Id,
                 FormDetails = x.FormDetails,
                 UserId = x.CreatedBy.Id,
-                Username = x.CreatedBy.Username
+                Username = x.CreatedBy.Username,
+                Offered = _dbContext.TrainingPlanOffers.Where(y => y.Trainer.Id == trainerId && y.TrainingPlanForm.Id == x.Id).Count() > 0
             }).ToListAsync();
 
         return Task.FromResult(result).Result;
+    }
+
+    public async Task<List<TrainingPlanOfferGetDto>> GetTrainingPlanOffers(int userId, bool trainer = false)
+    {
+        var list = await _dbContext.TrainingPlanOffers
+            .Include(x => x.Trainer)
+            .Include(x => x.TrainingPlanForm)
+            .Include(x => x.TrainingPlanForm.CreatedBy)
+            .Where(x => (!trainer && x.TrainingPlanForm.CreatedBy.Id == userId && x.Status != OfferStatus.Declined) || (trainer && x.Trainer.Id == userId))
+            .Select(x => new TrainingPlanOfferGetDto
+            {
+                PriceFrom = x.PriceFrom,
+                PriceTo = x.PriceTo,
+                Details = x.Details,
+                Status = x.Status.ToString(),
+                Trainer = new DTOs.User.TrainerGetDto
+                {
+                    Id = x.Trainer.Id,
+                    Name = x.Trainer.Name,
+                    LastName = x.Trainer.Surname,
+                    Email = _dbContext.ContactInfo.FirstOrDefault(y => y.Id == x.Trainer.ContactInfo.Id).EmailAddress,
+                    Phone = _dbContext.ContactInfo.FirstOrDefault(y => y.Id == x.Trainer.ContactInfo.Id).PhoneNumber,
+                    Username = x.Trainer.Username,
+                },
+                CreatedBy = new DTOs.User.UserGetDto
+                {
+                    Id = x.TrainingPlanForm.CreatedBy.Id,
+                    Username = x.TrainingPlanForm.CreatedBy.Username,
+                    Name = x.TrainingPlanForm.CreatedBy.Name,
+                    Surname = x.TrainingPlanForm.CreatedBy.Surname,
+                },
+                TrainingPlanOfferId = x.Id
+            }).ToListAsync();
+
+        return Task.FromResult(list).Result;
+    }
+
+    public async Task<bool> UpdateTrainingPlanOffer(int userId, int trainingPlanId, OfferStatus newStatus)
+    {
+        try
+        {
+            var trainingPlanOffer = await _dbContext.TrainingPlanOffers.FirstOrDefaultAsync(x => x.Id == trainingPlanId && x.TrainingPlanForm.CreatedBy.Id == userId);
+
+            if (trainingPlanOffer == null) { return Task.FromResult(false).Result; }
+
+            trainingPlanOffer.Status = newStatus;
+
+            _dbContext.TrainingPlanOffers.Update(trainingPlanOffer);
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> DeleteTrainingPlanOffer(int trainerId, int trainingPlanId)
+    {
+        try
+        {
+            var trainingPlanOffer = await _dbContext.TrainingPlanOffers.FirstOrDefaultAsync(x => x.Id == trainingPlanId && x.Trainer.Id == trainerId);
+
+            if (trainingPlanOffer == null) { return Task.FromResult(false).Result; }
+
+            _dbContext.TrainingPlanOffers.Remove(trainingPlanOffer);
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> PostTrainingPlanOffer(int trainerId, TrainingPlanOfferPostDto dto)
+    {
+        var trainer = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == trainerId);
+
+        if (trainer == null)
+        {
+            return Task.FromResult(false).Result;
+        }
+
+        try
+        {
+            var existingOffer = await _dbContext.TrainingPlanOffers.FirstOrDefaultAsync(x => x.Trainer.Id == trainerId && x.TrainingPlanForm.Id == dto.TrainingPlanFormId);
+
+            if (existingOffer != null)
+            {
+                existingOffer.Status = DataAccess.Enumerators.OfferStatus.Offered;
+                existingOffer.PriceFrom = dto.PriceFrom;
+                existingOffer.PriceTo = dto.PriceTo;
+                existingOffer.Details = dto.Details;
+                existingOffer.OfferedDate = DateTime.Now;
+
+                _dbContext.TrainingPlanOffers.Update(existingOffer);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                var trainingPlanForm = await _dbContext.TrainingPlanForms.FirstOrDefaultAsync(x => x.Id == dto.TrainingPlanFormId);
+
+                if (trainingPlanForm == null)
+                {
+                    return Task.FromResult(false).Result;
+                }
+
+                var trainingPlanOffer = new TrainingPlanOffer
+                {
+                    Trainer = trainer,
+                    Details = dto.Details,
+                    PriceFrom = dto.PriceFrom,
+                    PriceTo = dto.PriceTo,
+                    OfferedDate = DateTime.Now,
+                    Status = DataAccess.Enumerators.OfferStatus.Offered,
+                    TrainingPlanForm = trainingPlanForm,
+                };
+
+                await _dbContext.TrainingPlanOffers.AddAsync(trainingPlanOffer);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
     }
 }

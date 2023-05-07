@@ -23,5 +23,9 @@ public class Facility : Entity
 
     [Required]
     [StringLength(100)]
+    public string Address { get; set; }
+
+    [Required]
+    [StringLength(100)]
     public string ImageUri { get; set; }
 }

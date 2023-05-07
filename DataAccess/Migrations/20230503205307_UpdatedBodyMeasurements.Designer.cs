@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(FitnessAppDbContext))]
-    [Migration("20230422150005_UpdateTrainingPlan3")]
-    partial class UpdateTrainingPlan3
+    [Migration("20230503205307_UpdatedBodyMeasurements")]
+    partial class UpdatedBodyMeasurements
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,68 +24,6 @@ namespace DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Chat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("User1Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("User2Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User1Id");
-
-                    b.HasIndex("User2Id");
-
-                    b.ToTable("Chat");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ExerciseProgressId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MessageType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SentById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId");
-
-                    b.HasIndex("ExerciseProgressId");
-
-                    b.HasIndex("SentById");
-
-                    b.ToTable("Message");
-                });
 
             modelBuilder.Entity("DataAccess.Models.FormsModels.JobOffer", b =>
                 {
@@ -130,11 +68,6 @@ namespace DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Coordinates")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -271,6 +204,11 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -279,15 +217,15 @@ namespace DataAccess.Migrations
                     b.Property<int>("ContactInfoId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Coordinates")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ImageUri")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SportsClubId")
                         .HasColumnType("int");
@@ -336,6 +274,10 @@ namespace DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LogoUri")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -574,16 +516,10 @@ namespace DataAccess.Migrations
                     b.Property<int>("ExerciseId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("ScheduledEndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ScheduledStartDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Sets")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
 
                     b.Property<int>("TrainingPlanId")
                         .HasColumnType("int");
@@ -608,20 +544,26 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<double?>("Bust")
+                    b.Property<double?>("Chest")
                         .HasColumnType("float");
 
-                    b.Property<double?>("Hip")
+                    b.Property<double>("Height")
                         .HasColumnType("float");
+
+                    b.Property<double?>("Hips")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ImageUri")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("ImperialSystem")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("MeasureMentDay")
+                    b.Property<DateTime>("MeasurementDay")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PictureURI")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<double?>("Shoulders")
+                        .HasColumnType("float");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -629,7 +571,7 @@ namespace DataAccess.Migrations
                     b.Property<double?>("Waist")
                         .HasColumnType("float");
 
-                    b.Property<double?>("Weight")
+                    b.Property<double>("Weight")
                         .HasColumnType("float");
 
                     b.HasKey("Id");
@@ -777,50 +719,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ContactInfoId");
 
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Chat", b =>
-                {
-                    b.HasOne("DataAccess.Models.UserModels.User", "User1")
-                        .WithMany()
-                        .HasForeignKey("User1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataAccess.Models.UserModels.User", "User2")
-                        .WithMany()
-                        .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User1");
-
-                    b.Navigation("User2");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Message", b =>
-                {
-                    b.HasOne("DataAccess.Models.ChatModels.Chat", "Chat")
-                        .WithMany()
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataAccess.Models.TrainingPlanModels.ExerciseProgress", "ExerciseProgress")
-                        .WithMany()
-                        .HasForeignKey("ExerciseProgressId");
-
-                    b.HasOne("DataAccess.Models.UserModels.User", "SentBy")
-                        .WithMany()
-                        .HasForeignKey("SentById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("ExerciseProgress");
-
-                    b.Navigation("SentBy");
                 });
 
             modelBuilder.Entity("DataAccess.Models.FormsModels.JobOffer", b =>

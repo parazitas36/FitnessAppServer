@@ -22,68 +22,6 @@ namespace DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Chat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("User1Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("User2Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User1Id");
-
-                    b.HasIndex("User2Id");
-
-                    b.ToTable("Chat");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ExerciseProgressId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MessageType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SentById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId");
-
-                    b.HasIndex("ExerciseProgressId");
-
-                    b.HasIndex("SentById");
-
-                    b.ToTable("Message");
-                });
-
             modelBuilder.Entity("DataAccess.Models.FormsModels.JobOffer", b =>
                 {
                     b.Property<int>("Id")
@@ -262,6 +200,11 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -598,10 +541,13 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<double?>("Bust")
+                    b.Property<double?>("Chest")
                         .HasColumnType("float");
 
-                    b.Property<double?>("Hip")
+                    b.Property<double>("Height")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Hips")
                         .HasColumnType("float");
 
                     b.Property<string>("ImageUri")
@@ -613,13 +559,16 @@ namespace DataAccess.Migrations
                     b.Property<DateTime>("MeasurementDay")
                         .HasColumnType("datetime2");
 
+                    b.Property<double?>("Shoulders")
+                        .HasColumnType("float");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<double?>("Waist")
                         .HasColumnType("float");
 
-                    b.Property<double?>("Weight")
+                    b.Property<double>("Weight")
                         .HasColumnType("float");
 
                     b.HasKey("Id");
@@ -767,50 +716,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ContactInfoId");
 
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Chat", b =>
-                {
-                    b.HasOne("DataAccess.Models.UserModels.User", "User1")
-                        .WithMany()
-                        .HasForeignKey("User1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataAccess.Models.UserModels.User", "User2")
-                        .WithMany()
-                        .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User1");
-
-                    b.Navigation("User2");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.ChatModels.Message", b =>
-                {
-                    b.HasOne("DataAccess.Models.ChatModels.Chat", "Chat")
-                        .WithMany()
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataAccess.Models.TrainingPlanModels.ExerciseProgress", "ExerciseProgress")
-                        .WithMany()
-                        .HasForeignKey("ExerciseProgressId");
-
-                    b.HasOne("DataAccess.Models.UserModels.User", "SentBy")
-                        .WithMany()
-                        .HasForeignKey("SentById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("ExerciseProgress");
-
-                    b.Navigation("SentBy");
                 });
 
             modelBuilder.Entity("DataAccess.Models.FormsModels.JobOffer", b =>

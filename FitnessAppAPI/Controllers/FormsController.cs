@@ -1,4 +1,5 @@
-﻿using FitnessAppAPI.DTOs.Forms;
+﻿using DataAccess.Enumerators;
+using FitnessAppAPI.DTOs.Forms;
 using FitnessAppAPI.Services.Helpers;
 using FitnessAppAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -68,7 +69,7 @@ namespace FitnessAppAPI.Controllers
             return result ? Created(nameof(JobOfferPostDto), null) : BadRequest(); 
         }
 
-        [HttpGet("/trainer/trainerjobform")]
+        [HttpGet("trainer/trainerjobform")]
         [Authorize(Roles = "Trainer")]
         public async Task<IActionResult> GetTrainerJobForm()
         {
@@ -95,9 +96,11 @@ namespace FitnessAppAPI.Controllers
         }
 
         [HttpGet("trainingplanforms")]
+        [Authorize(Roles = "Trainer")]
         public async Task<IActionResult> GetTrainingPlanForms()
         {
-            return Ok(await _formsLogic.GetTrainingPlanForms());
+            var userId = JwtHelper.GetUserId(Request);
+            return Ok(await _formsLogic.GetTrainingPlanForms(userId));
         }
 
         [HttpGet("user/trainingplanforms")]
@@ -117,6 +120,63 @@ namespace FitnessAppAPI.Controllers
             bool result = await _formsLogic.PostTrainingPlanForm(userId, dto);
 
             return result ? Created(nameof(TrainingPlanFormPostDto), null) : BadRequest();
+        }
+
+        [HttpGet("trainingplanoffers/user")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> GetUserTrainingPlanOffers()
+        {
+            var userId = JwtHelper.GetUserId(Request);
+            var list = await _formsLogic.GetTrainingPlanOffers(userId);
+
+            return Ok(list);
+        }
+
+        [HttpGet("trainingplanoffers/trainer")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> GetTrainerTrainingPlanOffers()
+        {
+            var userId = JwtHelper.GetUserId(Request);
+            var list = await _formsLogic.GetTrainingPlanOffers(userId, true);
+
+            return Ok(list);
+        }
+
+        [HttpPatch("trainingplanoffers/{trainingPlanId:int}/{status}")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> UpdateTrainingPlanOffer(int trainingPlanId, string status)
+        {
+            OfferStatus offerStatus;
+
+            if (!Enum.TryParse(status, out offerStatus))
+            {
+                return BadRequest();
+            }
+
+            var userId = JwtHelper.GetUserId(Request);
+            bool result = await _formsLogic.UpdateTrainingPlanOffer(userId, trainingPlanId, offerStatus);
+
+            return result ? Ok() : BadRequest();
+        }
+
+        [HttpDelete("trainingplanoffers/{trainingPlanId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> DeleteTrainingPlanOffer(int trainingPlanId)
+        {
+            var userId = JwtHelper.GetUserId(Request);
+            bool result = await _formsLogic.DeleteTrainingPlanOffer(userId, trainingPlanId);
+
+            return result ? NoContent() : BadRequest();
+        }
+
+        [HttpPost("trainingplanoffers")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> PostTrainingPlanOffer([FromBody] TrainingPlanOfferPostDto dto)
+        {
+            var userId = JwtHelper.GetUserId(Request);
+            bool result = await _formsLogic.PostTrainingPlanOffer(userId, dto);
+
+            return result ? Created(nameof(TrainingPlanOfferPostDto), null) : BadRequest();
         }
     }
 }

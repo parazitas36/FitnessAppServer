@@ -8,6 +8,7 @@ public class FacilityGetDto
     public ContactInfoDto ContactInfo { get; set; }
     public int SportsClubId { get; set; }
     public string Country { get; set; }
+    public string Address { get; set; }
     public string City { get; set; }
     public string? ImageUri { get; set; }
 }

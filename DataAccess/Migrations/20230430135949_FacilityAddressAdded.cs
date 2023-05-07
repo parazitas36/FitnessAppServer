@@ -5,13 +5,13 @@
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateFacility : Migration
+    public partial class FacilityAddressAdded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "ImageUri",
+                name: "Address",
                 table: "Facility",
                 type: "nvarchar(100)",
                 maxLength: 100,
@@ -23,7 +23,7 @@ namespace DataAccess.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ImageUri",
+                name: "Address",
                 table: "Facility");
         }
     }

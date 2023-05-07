@@ -1,6 +1,5 @@
 ﻿namespace DataAccess.DatabaseContext;
 
-using DataAccess.Models.ChatModels;
 using DataAccess.Models.FormsModels;
 using DataAccess.Models.SportsClubModels;
 using DataAccess.Models.TrainingPlanModels;
@@ -11,8 +10,6 @@ public class FitnessAppDbContext : DbContext
 {
     public FitnessAppDbContext(DbContextOptions options) : base(options) { }
 
-    public DbSet<Chat> Chats { get; set; }
-    public DbSet<Message> Messages { get; set; }
     public DbSet<JobOffer> JobOffers { get; set; }
     public DbSet<TrainerJobForm> TrainerJobForms { get; set; }
     public DbSet<TrainingPlanForm> TrainingPlanForms { get; set; }

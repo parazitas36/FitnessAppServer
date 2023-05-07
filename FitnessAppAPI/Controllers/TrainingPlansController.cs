@@ -52,5 +52,22 @@ namespace FitnessAppAPI.Controllers
 
             return result is null ? NotFound() : Ok(result);
         }
+
+        [HttpPost("assign/{trainingPlanId:int}/{clientId:int}")]
+        public async Task<IActionResult> AssignTrainingPlan(int trainingPlanId, int clientId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+            bool result = await _trainingPlanLogic.AssignTrainingPlan(trainerId, clientId, trainingPlanId);
+
+            return result ? Created("", null) : BadRequest();
+        }
+
+        [HttpGet("userplans")]
+        public async Task<IActionResult> GetUserTrainingPlans()
+        {
+            var userId = JwtHelper.GetUserId(Request);
+
+            return Ok(await _trainingPlanLogic.GetUsersTrainingPlanShortList(userId));
+        }
     }
 }

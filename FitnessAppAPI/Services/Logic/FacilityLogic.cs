@@ -33,6 +33,7 @@ public class FacilityLogic : IFacilityLogic
                 PhoneNumber = y.ContactInfo.PhoneNumber,
             },
             ImageUri = y.ImageUri,
+            Address = y.Address,
         }).ToList());
     }
 
@@ -75,6 +76,7 @@ public class FacilityLogic : IFacilityLogic
                 Country = facility.Country,
                 SportsClub = sportsClub,
                 ImageUri = imageUri,
+                Address = facility.Address
             });
 
             await _dbContext.SaveChangesAsync();
