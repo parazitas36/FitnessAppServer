@@ -12,6 +12,5 @@ public class ExerciseProgress : Entity
     public DateTime? CompletionDate { get; set; }
 
     [Required]
-    [StringLength(100)]
     public string LoggedSets { get; set; }
 }

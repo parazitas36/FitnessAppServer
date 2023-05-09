@@ -45,12 +45,21 @@ namespace FitnessAppAPI.Controllers
         public async Task<IActionResult> GetTrainingPlanById(int trainingPlanId)
         {
             var userId = JwtHelper.GetUserId(Request);
+            var role = JwtHelper.GetRole(Request);
 
-            bool trainer = true;
+            if (role == null) { return Forbid(); }
 
-            var result = await _trainingPlanLogic.GetTrainingPlanById(userId, trainingPlanId, trainer);
+            bool trainer = role == DataAccess.Enumerators.Roles.Trainer;
 
-            return result is null ? NotFound() : Ok(result);
+            if (trainer)
+            {
+                var trainerResult = await _trainingPlanLogic.GetTrainingPlanById(userId, trainingPlanId);
+                return trainerResult == null ? NotFound() : Ok(trainerResult);
+            }
+
+            var userResult = await _trainingPlanLogic.GetUserTrainingPlanById(userId, trainingPlanId);
+
+            return userResult is null ? NotFound() : Ok(userResult);
         }
 
         [HttpPost("assign/{trainingPlanId:int}/{clientId:int}")]
@@ -68,6 +77,16 @@ namespace FitnessAppAPI.Controllers
             var userId = JwtHelper.GetUserId(Request);
 
             return Ok(await _trainingPlanLogic.GetUsersTrainingPlanShortList(userId));
+        }
+
+        [HttpPost("progress/{trainingPlanExerciseId:int}")]
+        public async Task<IActionResult> PostLoggedSets([FromBody] string loggedSets, int trainingPlanExerciseId)
+        {
+            var userId = JwtHelper.GetUserId(Request);
+
+            bool result = await _trainingPlanLogic.LogExerciseSet(userId, trainingPlanExerciseId, loggedSets);
+
+            return result ? Created("", null) : BadRequest();
         }
     }
 }

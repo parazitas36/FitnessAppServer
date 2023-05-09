@@ -3,6 +3,7 @@
 using DataAccess.DatabaseContext;
 using DataAccess.Enumerators;
 using DataAccess.Models.TrainingPlanModels;
+using FitnessAppAPI.DTOs.Equipment;
 using FitnessAppAPI.DTOs.TrainingPlan;
 using FitnessAppAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -231,27 +232,160 @@ public class TrainingPlanLogic : ITrainingPlanLogic
         return list;
     }
 
-    public async Task<TrainingPlanGetDto?> GetTrainingPlanById(int userId, int trainingPlanId, bool trainer)
+    public async Task<UserTrainingPlanGetDto?> GetUserTrainingPlanById(int userId, int trainingPlanId)
     {
-        if (trainer == false)
-        {
-            var result = _dbContext.ClientTrainingPlans.FirstOrDefaultAsync(x => x.TrainingPlan.Id == trainingPlanId && x.Client.Id == userId);
+        var trainingPlan = await _dbContext.ClientTrainingPlans
+            .Include(x => x.TrainingPlan)
+            .FirstOrDefaultAsync(x => x.TrainingPlan.Id == trainingPlanId && x.Client.Id == userId);
 
-            if (result is null) { return null; }
-        }
+        if (trainingPlan == null) { return null; }
 
-        List<TrainingPlanExercise> trainingPlanExercises = null;
+        var weeklyPlan = _dbContext.TrainingPlanExercises
+            .Where(x => x.TrainingPlan.Id == trainingPlanId)
+            .Select(x => x.Week)
+            .OrderBy(x => x)
+            .Distinct()
+            .Select(week => new UserWeeklyPlanWeekGetDto
+            {
+                Week = (int)week,
+                Days = new UserWeeklyPlanDaysGetDto
+                {
+                    Monday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Monday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                    Tuesday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Tuesday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                    Wednesday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Wednesday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                    Thursday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Thursday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                    Friday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Friday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                    Saturday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Saturday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                    Sunday = _dbContext.TrainingPlanExercises
+                        .Where(tpe => tpe.Week == week && tpe.TrainingPlan.Id == trainingPlanId && tpe.Day == Days.Sunday)
+                        .Select(tpe => new UserExercisesWithSetsGetDto
+                        {
+                            ExerciseId = tpe.Exercise.Id,
+                            ExerciseName = tpe.Exercise.Name,
+                            MuscleGroups = tpe.Exercise.MuscleGroups,
+                            Sets = tpe.Sets,
+                            TrainingPlanExerciseId = tpe.Id,
+                            Equipment = _dbContext.Equipment.Where(eq => eq.Id == tpe.Exercise.Equipment.Id).Select(eq => new EquipmentGetDto
+                            {
+                                Id = eq.Id,
+                                Name = eq.Name,
+                                ImageURI = eq.ImageURI
+                            }).FirstOrDefault(),
+                            LoggedSets = _dbContext.ExerciseProgress.FirstOrDefault(ls => ls.TrainingPlanExercise.Id == tpe.Id).LoggedSets,
+                        }).ToList(),
+                }
+            }).ToList();
 
-        if (trainer)
+        var result = new UserTrainingPlanGetDto
         {
-            trainingPlanExercises = await _dbContext.TrainingPlanExercises.Include(x => x.TrainingPlan).Include(x => x.Exercise)
-                .Where(x => x.TrainingPlan.CreatedBy.Id == userId && x.TrainingPlan.Id == trainingPlanId).ToListAsync();
-        }
-        else
-        {
-            trainingPlanExercises = await _dbContext.TrainingPlanExercises.Include(x => x.TrainingPlan).Include(x => x.Exercise)
-                .Where(x => x.TrainingPlan.Id == trainingPlanId).ToListAsync();
-        }
+            Name = trainingPlan.TrainingPlan.Name,
+            TrainingPlanId = trainingPlanId,
+            WeeklyPlan = weeklyPlan
+        };
+
+        return Task.FromResult(result).Result;
+    }
+
+    public async Task<TrainingPlanGetDto?> GetTrainingPlanById(int userId, int trainingPlanId)
+    {
+        List<TrainingPlanExercise> trainingPlanExercises = await _dbContext.TrainingPlanExercises.Include(x => x.TrainingPlan).Include(x => x.Exercise)
+            .Where(x => x.TrainingPlan.CreatedBy.Id == userId && x.TrainingPlan.Id == trainingPlanId).ToListAsync();
 
         if (trainingPlanExercises.IsNullOrEmpty()) { return null; }
 
@@ -269,6 +403,8 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
         List<WeeklyPlanWeekGetDto> weeklyPlan = new List<WeeklyPlanWeekGetDto>();
 
+        int editKey = 1;
+
         foreach (var week in weeks)
         {
             weeklyPlan.Add(new WeeklyPlanWeekGetDto
@@ -278,6 +414,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                 {
                     Monday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Monday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -285,6 +422,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
                     Tuesday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Tuesday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -292,6 +430,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
                     Wednesday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Wednesday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -299,6 +438,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
                     Thursday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Thursday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -306,6 +446,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
                     Friday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Friday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -313,6 +454,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
                     Saturday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Saturday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -320,6 +462,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
                     Sunday = trainingPlanExercises.Where(x => x.Week == week && x.Day == Days.Sunday).Select(x => new ExercisesWithSetsGetDto
                     {
+                        EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
                         Sets = x.Sets
@@ -357,6 +500,44 @@ public class TrainingPlanLogic : ITrainingPlanLogic
             await _dbContext.ClientTrainingPlans.AddAsync(clientTrainingPlan);
             await _dbContext.SaveChangesAsync();
 
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> LogExerciseSet(int userId, int trainingPlanExerciseId, string loggedSets)
+    {
+        var trainingPlanExercise = await _dbContext.TrainingPlanExercises
+            .Where(x => x.Id == trainingPlanExerciseId && _dbContext.ClientTrainingPlans
+                    .FirstOrDefault(y => y.TrainingPlan.Id == x.TrainingPlan.Id && y.Client.Id == userId) != null)
+            .FirstOrDefaultAsync();
+
+        if (trainingPlanExercise == null) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            var existingProgress = await _dbContext.ExerciseProgress.FirstOrDefaultAsync(x => x.TrainingPlanExercise.Id == trainingPlanExerciseId);
+
+            if (existingProgress != null)
+            {
+                existingProgress.LoggedSets = loggedSets;
+                _dbContext.ExerciseProgress.Update(existingProgress);
+            }
+            else
+            {
+                var newExerciseProgress = new ExerciseProgress
+                {
+                    LoggedSets = loggedSets,
+                    TrainingPlanExercise = trainingPlanExercise
+                };
+
+                await _dbContext.ExerciseProgress.AddAsync(newExerciseProgress);
+            }
+
+            await _dbContext.SaveChangesAsync();
             return Task.FromResult(true).Result;
         }
         catch
