@@ -1,6 +1,7 @@
-﻿using FitnessAppAPI.DTOs.TrainingPlan;
+﻿namespace FitnessAppAPI.Services.Interfaces;
 
-namespace FitnessAppAPI.Services.Interfaces;
+
+using FitnessAppAPI.DTOs.TrainingPlan;
 
 public interface ITrainingPlanLogic
 {
@@ -13,4 +14,8 @@ public interface ITrainingPlanLogic
     Task<bool> LogExerciseSet(int userId, int trainingPlanExerciseId, string loggedSets);
     Task<List<TrainingPlanShortGetDto>> GetClientTrainingPlans(int trainerId, int clientId);
     Task<UserTrainingPlanGetDto?> GetClientTrainingPlanById(int trainerId, int userId, int trainingPlanId);
+    Task<bool> CopyTrainingPlan(int trainerId, int trainingPlanId, string coppiedTrainingPlanName);
+    Task<bool> UpdateTrainingPlanAddNewExercise(int trainerId, int trainingPlanId, TrainingPlanNewExerciseUpdateDto dto);
+    Task<bool> UpdateTrainingPlanExercise(int trainerId, int trainingPlanExerciseId, string sets);
+    Task<bool> DeleteTrainingPlanExercise(int trainerId, int trainingPlanExerciseId);
 }

@@ -106,5 +106,54 @@ namespace FitnessAppAPI.Controllers
 
             return Ok(await _trainingPlanLogic.GetClientTrainingPlanById(trainerId, clientId, trainingPlanId));
         }
+
+        [HttpPost("copy/{trainingPlanId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> CopyTrainingPlan([FromBody] string trainingPlanName, int trainingPlanId)
+        {
+            if (trainingPlanName.Trim().Length == 0)
+            {
+                return BadRequest();
+            }
+
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            bool result = await _trainingPlanLogic.CopyTrainingPlan(trainerId, trainingPlanId, trainingPlanName);
+
+            return result ? Created("", null) : BadRequest();
+        }
+
+        [HttpPost("update/{trainingPlanId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> UpdateTrainingPlanAddNewExercise([FromBody] TrainingPlanNewExerciseUpdateDto dto, int trainingPlanId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            bool result = await _trainingPlanLogic.UpdateTrainingPlanAddNewExercise(trainerId, trainingPlanId, dto);
+
+            return result ? Ok() : BadRequest();
+        }
+
+        [HttpPatch("{trainingPlanExerciseId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> UpdateTrainingPlanExercise([FromBody] string sets, int trainingPlanExerciseId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            bool result = await _trainingPlanLogic.UpdateTrainingPlanExercise(trainerId, trainingPlanExerciseId, sets);
+
+            return result ? Ok() : BadRequest();
+        }
+
+        [HttpDelete("exercise/{trainingPlanExerciseId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> UpdateTrainingPlanExercise(int trainingPlanExerciseId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            bool result = await _trainingPlanLogic.DeleteTrainingPlanExercise(trainerId, trainingPlanExerciseId);
+
+            return result ? Ok() : BadRequest();
+        }
     }
 }

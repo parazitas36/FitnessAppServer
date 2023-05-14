@@ -42,6 +42,49 @@ public class TrainingPlanLogic : ITrainingPlanLogic
         }
     }
 
+    public async Task<bool> CopyTrainingPlan(int trainerId, int trainingPlanId, string coppiedTrainingPlanName)
+    {
+        var trainingPlan = await _dbContext.TrainingPlans.Include(x => x.CreatedBy).FirstOrDefaultAsync(x => x.CreatedBy.Id == trainerId && x.Id == trainingPlanId);
+
+        if (trainingPlan == null) { return Task.FromResult(false).Result; }
+
+        var trainingPlanExercises = await _dbContext.TrainingPlanExercises.Include(x => x.Exercise).Where(x => x.TrainingPlan.Id == trainingPlanId).ToListAsync();
+
+        try
+        {
+            var newTrainingPlan = new TrainingPlan
+            {
+                CreatedBy = trainingPlan.CreatedBy,
+                Name = coppiedTrainingPlanName
+            };
+
+            var insertedTrainingPlan = (await _dbContext.TrainingPlans.AddAsync(newTrainingPlan)).Entity;
+
+            var newTrainingPlanExercises = new List<TrainingPlanExercise>();
+
+            foreach (var trainingPlanExercise in trainingPlanExercises)
+            {
+                newTrainingPlanExercises.Add(new TrainingPlanExercise
+                {
+                    TrainingPlan = insertedTrainingPlan,
+                    Day = trainingPlanExercise.Day,
+                    Week = trainingPlanExercise.Week,
+                    Sets = trainingPlanExercise.Sets,
+                    Exercise = trainingPlanExercise.Exercise,
+                });
+            }
+
+            await _dbContext.TrainingPlanExercises.AddRangeAsync(newTrainingPlanExercises);
+            await _dbContext.SaveChangesAsync();
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+
+    }
+
     public async Task<List<TrainingPlanShortGetDto>> GetTrainersTrainingPlanShortList(int trainerId)
     {
         try
@@ -536,6 +579,10 @@ public class TrainingPlanLogic : ITrainingPlanLogic
 
     public async Task<bool> AssignTrainingPlan(int trainerId, int clientId, int trainingPlanId)
     {
+        var alreadyAssigned = await _dbContext.ClientTrainingPlans.FirstOrDefaultAsync(x => x.TrainingPlan.Id == trainingPlanId);
+
+        if (alreadyAssigned != null) { return Task.FromResult(false).Result; }
+
         var client = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == clientId);
 
         if (client == null) { return Task.FromResult(false).Result; }
@@ -593,6 +640,80 @@ public class TrainingPlanLogic : ITrainingPlanLogic
             }
 
             await _dbContext.SaveChangesAsync();
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> UpdateTrainingPlanAddNewExercise(int trainerId, int trainingPlanId, TrainingPlanNewExerciseUpdateDto dto)
+    {
+        var trainingPlan = await _dbContext.TrainingPlans.FirstOrDefaultAsync(x => x.CreatedBy.Id == trainerId && x.Id == trainingPlanId);
+        var exercise = await _dbContext.Exercises.FirstOrDefaultAsync(x => x.Id == dto.ExerciseId && x.CreatedBy.Id == trainerId);
+
+        Days day;
+
+        if (trainingPlan == null || exercise == null || !Enum.TryParse(dto.Day, out day)) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            var newTrainingPlanExercise = new TrainingPlanExercise
+            {
+                Day = day,
+                Week = dto.Week,
+                Exercise = exercise,
+                Sets = dto.Sets,
+                TrainingPlan = trainingPlan
+            };
+
+            await _dbContext.TrainingPlanExercises.AddAsync(newTrainingPlanExercise);
+            await _dbContext.SaveChangesAsync();
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> UpdateTrainingPlanExercise(int trainerId, int trainingPlanExerciseId, string sets)
+    {
+        var trainingPlanExercise = await _dbContext.TrainingPlanExercises
+            .FirstOrDefaultAsync(x => x.TrainingPlan.CreatedBy.Id == trainerId && x.Id == trainingPlanExerciseId);
+
+        if (trainingPlanExercise == null) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            trainingPlanExercise.Sets = sets;
+
+            _dbContext.TrainingPlanExercises.Update(trainingPlanExercise);
+            await _dbContext.SaveChangesAsync();
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> DeleteTrainingPlanExercise(int trainerId, int trainingPlanExerciseId)
+    {
+        var clientProgress = await _dbContext.ExerciseProgress.FirstOrDefaultAsync(x => x.TrainingPlanExercise.Id == trainingPlanExerciseId);
+
+        if (clientProgress != null) { return Task.FromResult(false).Result; }
+
+        var trainingPlanExercise = await _dbContext.TrainingPlanExercises.FirstOrDefaultAsync(x => x.Id == trainingPlanExerciseId && x.TrainingPlan.CreatedBy.Id == trainerId);
+
+        if(trainingPlanExercise == null) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            _dbContext.TrainingPlanExercises.Remove(trainingPlanExercise);
+            await _dbContext.SaveChangesAsync();
+
             return Task.FromResult(true).Result;
         }
         catch
