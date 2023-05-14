@@ -89,4 +89,12 @@ public class UsersController : ControllerBase
 
         return result ? Ok() : BadRequest();
     }
+
+    [HttpGet("clients")]
+    public async Task<IActionResult> GetClients()
+    {
+        var trainerId = JwtHelper.GetUserId(Request);
+
+        return Ok(await _usersLogic.GetTrainerClients(trainerId));
+    }
 }

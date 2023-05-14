@@ -45,6 +45,7 @@ builder.Services.AddScoped<IFacilityLogic, FacilityLogic>();
 builder.Services.AddScoped<IExercisesLogic, ExercisesLogic>();
 builder.Services.AddScoped<ITrainingPlanLogic, TrainingPlanLogic>();
 builder.Services.AddScoped<IFormsLogic, FormsLogic>();
+builder.Services.AddScoped<IProgressLogic, ProgressLogic>();
 
 builder.Services.Configure<KestrelServerOptions>(options => options.Limits.MaxRequestBodySize = int.MaxValue);
 builder.Services.Configure<FormOptions>(options =>

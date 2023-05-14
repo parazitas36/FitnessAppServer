@@ -3,6 +3,7 @@
 using DataAccess.DatabaseContext;
 using DataAccess.Enumerators;
 using DataAccess.Models.TrainingPlanModels;
+using DataAccess.Models.UserModels;
 using FitnessAppAPI.DTOs.Equipment;
 using FitnessAppAPI.DTOs.TrainingPlan;
 using FitnessAppAPI.Services.Interfaces;
@@ -47,6 +48,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
         {
             var trainingPlanExercises = await _dbContext.TrainingPlanExercises
                 .Include(x => x.TrainingPlan)
+                .Include(x => x.TrainingPlan.CreatedBy)
                 .Include(x => x.Exercise)
                 .Include(x => x.Exercise.Equipment)
                 .Where(x => x.TrainingPlan.CreatedBy.Id == trainerId).ToListAsync();
@@ -69,6 +71,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                     {
                         Id = trainingPlan.Id,
                         CreatedById = trainerId,
+                        CreatedBy = trainingPlan.CreatedBy.Username,
                         Equipment = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.Equipment).Where(x => x is not null).Distinct().ToList(),
                         MuscleGroups = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.MuscleGroups).Distinct().ToList(),
                         Name = trainingPlan.Name,
@@ -110,6 +113,48 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                     {
                         Id = trainingPlan.Id,
                         CreatedById = trainingPlan.CreatedBy.Id,
+                        CreatedBy = trainingPlan.CreatedBy.Username,
+                        Equipment = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.Equipment).Where(x => x is not null).Distinct().ToList(),
+                        MuscleGroups = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.MuscleGroups).Distinct().ToList(),
+                        Name = trainingPlan.Name,
+                    });
+                }
+            }
+
+            return Task.FromResult(trainingPlans).Result;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<List<TrainingPlanShortGetDto>> GetClientTrainingPlans(int trainerId, int clientId)
+    {
+        try
+        {
+            var trainingPlanExercises = await _dbContext.TrainingPlanExercises
+                .Include(x => x.TrainingPlan)
+                .Include(x => x.Exercise)
+                .Include(x => x.Exercise.Equipment)
+                .Include(x => x.TrainingPlan.CreatedBy)
+                .Where(x => _dbContext.ClientTrainingPlans
+                    .FirstOrDefault(y => y.TrainingPlan.Id == x.TrainingPlan.Id && y.Client.Id == clientId && y.TrainingPlan.CreatedBy.Id == trainerId)
+                    .TrainingPlan.Id == x.TrainingPlan.Id)
+                .ToListAsync();
+
+            var trainingPlans = new List<TrainingPlanShortGetDto>();
+            var uniqueTrainingPlans = trainingPlanExercises.DistinctBy(x => x.TrainingPlan.Id).Select(x => x.TrainingPlan).ToList();
+
+            foreach (var trainingPlan in uniqueTrainingPlans)
+            {
+                if (!trainingPlans.Any(x => x.Id == trainingPlan.Id))
+                {
+                    trainingPlans.Add(new TrainingPlanShortGetDto
+                    {
+                        Id = trainingPlan.Id,
+                        CreatedById = trainingPlan.CreatedBy.Id,
+                        CreatedBy = trainingPlan.CreatedBy.Username,
                         Equipment = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.Equipment).Where(x => x is not null).Distinct().ToList(),
                         MuscleGroups = trainingPlanExercises.Where(x => x.TrainingPlan.Id == trainingPlan.Id).Select(x => x.Exercise.MuscleGroups).Distinct().ToList(),
                         Name = trainingPlan.Name,
@@ -230,6 +275,16 @@ public class TrainingPlanLogic : ITrainingPlanLogic
         }
 
         return list;
+    }
+
+    public async Task<UserTrainingPlanGetDto?> GetClientTrainingPlanById(int trainerId, int userId, int trainingPlanId)
+    {
+        var trainingPlan = await _dbContext.ClientTrainingPlans
+            .FirstOrDefaultAsync(x => x.Client.Id == userId && x.TrainingPlan.Id == trainingPlanId && x.TrainingPlan.CreatedBy.Id == trainerId);
+
+        if (trainingPlan == null) { return null; }
+
+        return await GetUserTrainingPlanById(userId, trainingPlanId);
     }
 
     public async Task<UserTrainingPlanGetDto?> GetUserTrainingPlanById(int userId, int trainingPlanId)

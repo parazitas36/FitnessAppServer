@@ -88,5 +88,23 @@ namespace FitnessAppAPI.Controllers
 
             return result ? Created("", null) : BadRequest();
         }
+
+        [HttpGet("client/{clientId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> GetClientTrainingPlans(int clientId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            return Ok(await _trainingPlanLogic.GetClientTrainingPlans(trainerId, clientId));
+        }
+
+        [HttpGet("client/{clientId:int}/trainingPlan/{trainingPlanId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> GetClientTrainingPlans(int clientId, int trainingPlanId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            return Ok(await _trainingPlanLogic.GetClientTrainingPlanById(trainerId, clientId, trainingPlanId));
+        }
     }
 }

@@ -2,6 +2,7 @@
 using DataAccess.Enumerators;
 using DataAccess.Models.SportsClubModels;
 using DataAccess.Models.UserModels;
+using FitnessAppAPI.DTOs.Client;
 using FitnessAppAPI.DTOs.User;
 using FitnessAppAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -206,5 +207,24 @@ public class UsersLogic : IUsersLogic
         {
             return Task.FromResult(false).Result;
         }
+    }
+
+    public async Task<List<ClientGetDto>> GetTrainerClients(int trainerId)
+    {
+        var result = (await _dbContext.ClientTrainingPlans
+            .Include(x => x.Client)
+            .Where(x => x.TrainingPlan.CreatedBy.Id == trainerId)
+            .Select(x => new ClientGetDto
+            {
+                Id = x.Client.Id,
+                Username = x.Client.Username,
+                Name = x.Client.Name,
+                Surname = x.Client.Surname,
+                Email = _dbContext.ContactInfo.FirstOrDefault(y => y.Id == x.Client.ContactInfo.Id).EmailAddress,
+                PhoneNumber = _dbContext.ContactInfo.FirstOrDefault(y => y.Id == x.Client.ContactInfo.Id).PhoneNumber,
+                TrainingPlansAssigned = _dbContext.ClientTrainingPlans.Count(y => y.Client.Id == x.Client.Id && y.TrainingPlan.CreatedBy.Id == x.TrainingPlan.CreatedBy.Id)
+            }).ToListAsync()).DistinctBy(x => x.Id).ToList();
+
+        return Task.FromResult(result).Result;
     }
 }

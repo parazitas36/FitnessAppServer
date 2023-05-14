@@ -11,4 +11,6 @@ public interface ITrainingPlanLogic
     Task<List<TrainingPlanShortGetDto>> GetUsersTrainingPlanShortList(int userId);
     Task<UserTrainingPlanGetDto> GetUserTrainingPlanById(int userId, int trainingPlanId);
     Task<bool> LogExerciseSet(int userId, int trainingPlanExerciseId, string loggedSets);
+    Task<List<TrainingPlanShortGetDto>> GetClientTrainingPlans(int trainerId, int clientId);
+    Task<UserTrainingPlanGetDto?> GetClientTrainingPlanById(int trainerId, int userId, int trainingPlanId);
 }
