@@ -155,5 +155,25 @@ namespace FitnessAppAPI.Controllers
 
             return result ? Ok() : BadRequest();
         }
+
+        [HttpDelete("trainer/trainingplan/{trainingPlanId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> DeleteTrainingPlan(int trainingPlanId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+            bool result = await _trainingPlanLogic.DeleteTrainingPlan(trainerId, trainingPlanId);
+
+            return result ? NoContent() : BadRequest();
+        }
+
+        [HttpDelete("user/trainingplan/{trainingPlanId:int}")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> DeleteUserTrainingPlan(int trainingPlanId)
+        {
+            var userId = JwtHelper.GetUserId(Request);
+            bool result = await _trainingPlanLogic.DeleteUserTrainingPlan(userId, trainingPlanId);
+
+            return result ? NoContent() : BadRequest();
+        }
     }
 }

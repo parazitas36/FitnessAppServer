@@ -13,11 +13,11 @@ public class Exercise : Entity
     public User CreatedBy { get; set; }
 
     [Required]
-    [StringLength(50)]
+    [StringLength(100)]
     public string Name { get; set; }
 
     [Required]
-    [StringLength(50)]
+    [StringLength(256)]
     public string MuscleGroups { get; set; }
 
     [Required]

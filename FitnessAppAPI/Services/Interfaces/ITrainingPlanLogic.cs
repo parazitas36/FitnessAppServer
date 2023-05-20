@@ -18,4 +18,6 @@ public interface ITrainingPlanLogic
     Task<bool> UpdateTrainingPlanAddNewExercise(int trainerId, int trainingPlanId, TrainingPlanNewExerciseUpdateDto dto);
     Task<bool> UpdateTrainingPlanExercise(int trainerId, int trainingPlanExerciseId, string sets);
     Task<bool> DeleteTrainingPlanExercise(int trainerId, int trainingPlanExerciseId);
+    Task<bool> DeleteTrainingPlan(int trainerId, int trainingPlanId);
+    Task<bool> DeleteUserTrainingPlan(int userId, int trainingPlanId);
 }

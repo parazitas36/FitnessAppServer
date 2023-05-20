@@ -227,4 +227,23 @@ public class UsersLogic : IUsersLogic
 
         return Task.FromResult(result).Result;
     }
+
+    public async Task<List<UserGetDto>> FindUsersByUsername(string username)
+    {
+        var users = await _dbContext.Users.Where(x => x.Role == Roles.User && x.Username.Contains(username))
+            .Select(x => new UserGetDto
+            {
+                Id = x.Id,
+                Username = x.Username,
+                Name = x.Name,
+                Surname = x.Surname,
+                ContactInfo = new ContactInfoDto
+                {
+                    Email = _dbContext.ContactInfo.FirstOrDefault(y => y.Id == x.ContactInfo.Id).EmailAddress,
+                    PhoneNumber = _dbContext.ContactInfo.FirstOrDefault(y => y.Id == x.ContactInfo.Id).PhoneNumber,
+                }
+            }).ToListAsync();
+
+        return Task.FromResult(users).Result;
+    }
 }

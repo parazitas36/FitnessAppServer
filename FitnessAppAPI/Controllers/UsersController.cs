@@ -82,6 +82,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("reviews")]
+    [Authorize]
     public async Task<IActionResult> PostReview([FromBody] ReviewPostDto dto)
     {
         var userId = JwtHelper.GetUserId(Request);
@@ -91,10 +92,18 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("clients")]
+    [Authorize]
     public async Task<IActionResult> GetClients()
     {
         var trainerId = JwtHelper.GetUserId(Request);
 
         return Ok(await _usersLogic.GetTrainerClients(trainerId));
+    }
+
+    [HttpGet("search/{username}")]
+    [Authorize]
+    public async Task<IActionResult> FindUsersByUsername(string username)
+    {
+        return Ok(await _usersLogic.FindUsersByUsername(username));
     }
 }

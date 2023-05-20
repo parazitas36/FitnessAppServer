@@ -721,4 +721,61 @@ public class TrainingPlanLogic : ITrainingPlanLogic
             return Task.FromResult(false).Result;
         }
     }
+
+    public async Task<bool> DeleteTrainingPlan(int trainerId, int trainingPlanId)
+    {
+        var trainingPlan = await _dbContext.ClientTrainingPlans.FirstOrDefaultAsync(x => x.TrainingPlan.Id == trainingPlanId && x.TrainingPlan.CreatedBy.Id == trainerId);
+
+        if (trainingPlan != null) { return Task.FromResult(false).Result; }
+
+        var trainingPlanExercises = await _dbContext.TrainingPlanExercises
+            .Include(x => x.TrainingPlan)
+            .Where(x => x.TrainingPlan.Id == trainingPlanId && x.TrainingPlan.CreatedBy.Id == trainerId).ToListAsync();
+
+        if (trainingPlanExercises.IsNullOrEmpty()) { return Task.FromResult(false).Result; }
+
+        var removeTrainingPlan = trainingPlanExercises.First().TrainingPlan;
+
+        try
+        {
+            _dbContext.TrainingPlanExercises.RemoveRange(trainingPlanExercises);
+            _dbContext.TrainingPlans.Remove(removeTrainingPlan);
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> DeleteUserTrainingPlan(int userId, int trainingPlanId)
+    {
+        var clientTrainingPlan = await _dbContext.ClientTrainingPlans
+            .Include(x => x.TrainingPlan)
+            .FirstOrDefaultAsync(x => x.TrainingPlan.Id == trainingPlanId && x.Client.Id == userId);
+
+        if (clientTrainingPlan == null) { return Task.FromResult(false).Result; }
+
+        var clientProgress = await _dbContext.ExerciseProgress.Where(x => x.TrainingPlanExercise.TrainingPlan.Id == clientTrainingPlan.TrainingPlan.Id).ToListAsync();
+
+        try
+        {
+            if (!clientProgress.IsNullOrEmpty())
+            {
+                _dbContext.ExerciseProgress.RemoveRange(clientProgress);
+            }
+
+            _dbContext.ClientTrainingPlans.Remove(clientTrainingPlan); 
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+
+    }
 }

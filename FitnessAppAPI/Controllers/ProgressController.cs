@@ -19,9 +19,22 @@ namespace FitnessAppAPI.Controllers
         [HttpGet("{trainingPlanId:int}")]
         public async Task<IActionResult> GetTrainingPlanProgress(int trainingPlanId)
         {
-            var trainerId = JwtHelper.GetUserId(Request);
+            var role = JwtHelper.GetRole(Request);
 
-            return Ok(await _progressLogic.GetTrainingPlanProgress(trainerId, trainingPlanId));
+            if (role == DataAccess.Enumerators.Roles.Trainer)
+            {
+                var trainerId = JwtHelper.GetUserId(Request);
+
+                return Ok(await _progressLogic.GetTrainingPlanProgress(trainerId, trainingPlanId));
+            }
+            else if (role == DataAccess.Enumerators.Roles.User)
+            {
+                var userId = JwtHelper.GetUserId(Request);
+
+                return Ok(await _progressLogic.GetUserTrainingPlanProgress(userId, trainingPlanId));
+            }
+
+            return NotFound();
         }
     }
 }
