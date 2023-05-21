@@ -10,8 +10,6 @@ public class FitnessAppDbContext : DbContext
 {
     public FitnessAppDbContext(DbContextOptions options) : base(options) { }
 
-    public DbSet<JobOffer> JobOffers { get; set; }
-    public DbSet<TrainerJobForm> TrainerJobForms { get; set; }
     public DbSet<TrainingPlanForm> TrainingPlanForms { get; set; }
     public DbSet<TrainingPlanOffer> TrainingPlanOffers { get; set; }
     public DbSet<Equipment> Equipment { get; set; }
@@ -32,4 +30,6 @@ public class FitnessAppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<PasswordReset> PasswordReset { get; set; }
+
+    public DbSet<TrainerInvite> TrainerInvites { get; set; }
 }

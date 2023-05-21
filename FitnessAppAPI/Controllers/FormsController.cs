@@ -40,61 +40,6 @@ namespace FitnessAppAPI.Controllers
             return result ? Created(nameof(BodyMeasurementsPostDto), null) : BadRequest();
         }
 
-        [HttpGet("trainer/joboffers")]
-        [Authorize(Roles = "Trainer")]
-        public async Task<IActionResult> GetJobOffers()
-        {
-            var trainerId = JwtHelper.GetUserId(Request);
-
-            return Ok(await _formsLogic.GetJobOffers(trainerId));
-        }
-
-        [HttpGet("sportsclub/joboffers")]
-        [Authorize(Roles = "SportsClubAdmin")]
-        public async Task<IActionResult> GetSportsClubJobOffers()
-        {
-            var sportsClubAdminId = JwtHelper.GetUserId(Request);
-
-            return Ok(await _formsLogic.GetSportsClubsJobOffers(sportsClubAdminId));
-        }
-
-        [HttpPost("joboffers")]
-        [Authorize(Roles = "SportsClubAdmin")]
-        public async Task<IActionResult> PostJobOffer([FromBody] JobOfferPostDto dto)
-        {
-            var userId = JwtHelper.GetUserId(Request);
-
-            bool result = await _formsLogic.PostJobOffer(userId, dto);
-
-            return result ? Created(nameof(JobOfferPostDto), null) : BadRequest(); 
-        }
-
-        [HttpGet("trainer/trainerjobform")]
-        [Authorize(Roles = "Trainer")]
-        public async Task<IActionResult> GetTrainerJobForm()
-        {
-            var userId = JwtHelper.GetUserId(Request);
-
-            return Ok(await _formsLogic.GetTrainerJobForms(userId));
-        }
-
-        [HttpGet("trainerjobform")]
-        public async Task<IActionResult> GetTrainersJobForm()
-        {
-            return Ok(await _formsLogic.GetTrainersJobForms());
-        }
-
-        [HttpPost("trainerjobform")]
-        [Authorize(Roles = "Trainer")]
-        public async Task<IActionResult> PostTrainerJobForm([FromBody] TrainerJobFormPostDto dto)
-        {
-            var userId = JwtHelper.GetUserId(Request);
-
-            bool result = await _formsLogic.PostTrainerJobForm(userId, dto);
-
-            return result ? Created(nameof(TrainerJobFormPostDto), null) : BadRequest();
-        }
-
         [HttpGet("trainingplanforms")]
         [Authorize(Roles = "Trainer")]
         public async Task<IActionResult> GetTrainingPlanForms()
@@ -177,6 +122,40 @@ namespace FitnessAppAPI.Controllers
             bool result = await _formsLogic.PostTrainingPlanOffer(userId, dto);
 
             return result ? Created(nameof(TrainingPlanOfferPostDto), null) : BadRequest();
+        }
+
+        [HttpPost("trainerinvites/trainer/{trainerId:int}")]
+        [Authorize(Roles = "SportsClubAdmin")]
+        public async Task<IActionResult> PostTrainerInvite(int trainerId)
+        {
+            var sportsClubAdminId = JwtHelper.GetUserId(Request);
+            bool result = await _formsLogic.PostTrainerInvite(sportsClubAdminId, trainerId);
+
+            return result ? Created("", null) : BadRequest();
+        }
+
+        [HttpGet("trainerinvites")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> GetTrainerInvites()
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+            return Ok(await _formsLogic.GetTrainerInvites(trainerId));
+        }
+
+        [HttpPatch("trainerinvites/{inviteId:int}/{status}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> ChangeTrainerInviteStatus(int inviteId, string status)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            if (Enum.TryParse(status, out OfferStatus offerStatus))
+            {
+                bool result = await _formsLogic.ChangeTrainerInviteStatus(trainerId, inviteId, offerStatus);
+
+                return result ? Ok() : BadRequest();
+            }
+
+            return BadRequest();
         }
     }
 }

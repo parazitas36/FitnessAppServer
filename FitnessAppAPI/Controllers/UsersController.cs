@@ -70,13 +70,28 @@ public class UsersController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetTrainers()
     {
+        var role = JwtHelper.GetRole(Request);
+
+        if (role == DataAccess.Enumerators.Roles.SportsClubAdmin)
+        {
+            var sportsClubAdminId = JwtHelper.GetUserId(Request);
+            return Ok(await _usersLogic.GetTrainers(sportsClubAdminId));
+        }
+
         return Ok(await _usersLogic.GetTrainers());
     }
 
     [HttpGet("trainers/{trainerId:int}")]
     [Authorize]
-    public async Task<IActionResult> GetTrainers(int trainerId)
+    public async Task<IActionResult> GetTrainer(int trainerId)
     {
+        if (JwtHelper.GetRole(Request) == DataAccess.Enumerators.Roles.SportsClubAdmin)
+        {
+            var sportsClubAdminId = JwtHelper.GetUserId(Request);
+
+            var result = await _usersLogic.GetTrainerInfo(trainerId, sportsClubAdminId);
+            return result is null ? NotFound() : Ok(result);
+        }
         var trainer = await _usersLogic.GetTrainerInfo(trainerId);
         return trainer is null ? NotFound() : Ok(trainer);
     }

@@ -3,6 +3,7 @@
 using DataAccess.DatabaseContext;
 using DataAccess.Enumerators;
 using DataAccess.Models.FormsModels;
+using DataAccess.Models.SportsClubModels;
 using DataAccess.Models.UserModels;
 using FitnessAppAPI.DTOs.Forms;
 using FitnessAppAPI.Services.Helpers;
@@ -92,63 +93,6 @@ public class FormsLogic : IFormsLogic
         }
     }
 
-    public async Task<bool> PostTrainerJobForm(int trainerId, TrainerJobFormPostDto dto)
-    {
-        var trainer = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == trainerId);
-
-        if (trainer == null) { return Task<bool>.FromResult(false).Result; }
-
-        try
-        {
-            var trainerJobFomr = new TrainerJobForm
-            {
-                City = dto.City,
-                Country = dto.Country,
-                CreationDate = DateTime.Now,
-                OtherDetails = dto.OtherDetails,
-                Education = dto.Education,
-                PersonalAchievements = dto.PersonalAchievements,
-                Trainer = trainer,
-            };
-
-            await _dbContext.TrainerJobForms.AddRangeAsync(trainerJobFomr);
-            await _dbContext.SaveChangesAsync();
-            return Task.FromResult(true).Result;
-        }
-        catch
-        {
-            return Task.FromResult(false).Result;
-        }
-    }
-
-    public async Task<bool> PostJobOffer(int sportsClubAdminId, JobOfferPostDto dto)
-    {
-        var sportsClub = await _dbContext.SportsClubs.FirstOrDefaultAsync(x => x.Owner.Id == sportsClubAdminId);
-        var trainerJobForm = await _dbContext.TrainerJobForms.FirstOrDefaultAsync(x => x.Id == dto.TrainerJobFormId);
-
-        if (sportsClub == null || trainerJobForm == null) { return Task.FromResult(false).Result; }
-
-        try
-        {
-            var jobOffer = new JobOffer
-            {
-                TrainerJobForm = trainerJobForm,
-                Details = dto.Details,
-                OfferDate = DateTime.Now,
-                SportsClub = sportsClub,
-                Status = DataAccess.Enumerators.OfferStatus.Offered
-            };
-
-            await _dbContext.JobOffers.AddAsync(jobOffer);
-            await _dbContext.SaveChangesAsync();
-            return Task.FromResult(true).Result;
-        }
-        catch
-        {
-            return Task.FromResult(false).Result;
-        }
-    }
-
     public async Task<List<BodyMeasurementsGetDto>> GetBodyMeasurements(int userId)
     {
         var result = await _dbContext.BodyMeasurements.Where(x => x.User.Id == userId).Select(x => new BodyMeasurementsGetDto
@@ -164,81 +108,6 @@ public class FormsLogic : IFormsLogic
             Weight = x.Weight,
             ImageUri = x.ImageUri
         }).OrderByDescending(x => x.MeasurementDay).ToListAsync();
-
-        return Task.FromResult(result).Result;
-    }
-
-    public async Task<List<JobOfferGetDto>> GetJobOffers(int trainerId)
-    {
-        var result = await _dbContext.JobOffers.Include(x => x.SportsClub).Include(x => x.TrainerJobForm)
-            .Where(x => x.TrainerJobForm.Trainer.Id == trainerId).Select(x => new JobOfferGetDto
-            {
-                TrainerJobFormId = x.TrainerJobForm.Id,
-                Details = x.Details,
-                OfferDate = x.OfferDate,
-                SportsClubId = x.SportsClub.Id,
-                SportsClubName = x.SportsClub.Name,
-                Status = x.Status.ToString(),
-                Id = x.Id,
-            }).ToListAsync();
-
-        return Task.FromResult(result).Result;
-    }
-
-    public async Task<List<JobOfferGetDto>> GetSportsClubsJobOffers(int sportsClubAdminId)
-    {
-        var result = await _dbContext.JobOffers.Include(x => x.SportsClub).Include(x => x.TrainerJobForm)
-            .Include(x => x.TrainerJobForm.Trainer)
-            .Where(x => x.SportsClub.Owner.Id == sportsClubAdminId).Select(x => new JobOfferGetDto
-            {
-                TrainerId = x.TrainerJobForm.Trainer.Id,
-                TrainerUserName = x .TrainerJobForm.Trainer.Username,
-                TrainerJobFormId = x.TrainerJobForm.Id,
-                Details = x.Details,
-                OfferDate = x.OfferDate,
-                SportsClubId = x.SportsClub.Id,
-                SportsClubName = x.SportsClub.Name,
-                Status = x.Status.ToString(),
-                Id = x.Id,
-            }).ToListAsync();
-
-        return Task.FromResult(result).Result;
-    }
-
-    public async Task<List<TrainerJobFormGetDto>> GetTrainerJobForms(int trainerId)
-    {
-        var result = await _dbContext.TrainerJobForms.Include(x => x.Trainer)
-            .Where(x => x.Trainer.Id == trainerId).Select(x => new TrainerJobFormGetDto
-            {
-                City = x.City,
-                CreationDate = x.CreationDate,
-                OtherDetails = x.OtherDetails,
-                Country = x.Country,
-                Education = x.Education,
-                Id = x.Id,
-                PersonalAchievements = x.PersonalAchievements,
-                TrainerId = trainerId,
-                TrainerUsername = x.Trainer.Username,
-            }).ToListAsync();
-
-        return Task.FromResult(result).Result;
-    }
-
-    public async Task<List<TrainerJobFormGetDto>> GetTrainersJobForms()
-    {
-        var result = await _dbContext.TrainerJobForms.Include(x => x.Trainer)
-            .Select(x => new TrainerJobFormGetDto
-            {
-                City = x.City,
-                CreationDate = x.CreationDate,
-                OtherDetails = x.OtherDetails,
-                Country = x.Country,
-                Education = x.Education,
-                Id = x.Id,
-                PersonalAchievements = x.PersonalAchievements,
-                TrainerId = x.Trainer.Id,
-                TrainerUsername = x.Trainer.Username
-            }).ToListAsync();
 
         return Task.FromResult(result).Result;
     }
@@ -396,6 +265,84 @@ public class FormsLogic : IFormsLogic
                 await _dbContext.TrainingPlanOffers.AddAsync(trainingPlanOffer);
                 await _dbContext.SaveChangesAsync();
             }
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<bool> PostTrainerInvite(int sportsClubAdminId, int trainerId)
+    {
+        var sportsClub = await _dbContext.SportsClubs.FirstOrDefaultAsync(x => x.Owner.Id == sportsClubAdminId);
+        var trainer = await _dbContext.Users.FirstOrDefaultAsync(x => x.Role == Roles.Trainer && x.Id == trainerId);
+
+        if (sportsClub == null || trainer == null) { return Task.FromResult(false).Result; }
+
+        var invite = new TrainerInvite
+        {
+            Date = DateTime.Now,
+            InvitedBy = sportsClub,
+            Status = OfferStatus.Offered,
+            Trainer = trainer
+        };
+
+        try
+        {
+            await _dbContext.TrainerInvites.AddAsync(invite);
+            await _dbContext.SaveChangesAsync();
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
+    public async Task<List<TrainerInviteGetDto>> GetTrainerInvites(int trainerId)
+    {
+        var result = await _dbContext.TrainerInvites.Where(x => x.Trainer.Id == trainerId)
+            .Select(x => new TrainerInviteGetDto
+            {
+                Id = x.Id,
+                Date = x.Date,
+                SportsClubId = x.InvitedBy.Id,
+                SportsClub = x.InvitedBy.Name,
+                Status = x.Status.ToString(),
+                TrainerId = trainerId
+            }).ToListAsync();
+
+        return Task.FromResult(result).Result;
+    }
+
+    public async Task<bool> ChangeTrainerInviteStatus(int trainerId, int trainerInviteId, OfferStatus status)
+    {
+        var trainerInvite = await _dbContext.TrainerInvites
+            .Include(x => x.Trainer)
+            .Include(x => x.InvitedBy)
+            .FirstOrDefaultAsync(x => x.Trainer.Id == trainerId && x.Id == trainerInviteId);
+
+        try
+        {
+            if (trainerInvite == null) { return Task.FromResult(false).Result; }
+
+            if (status == OfferStatus.Accepted)
+            {
+                var sportsClub = await _dbContext.SportsClubs.FirstOrDefaultAsync(x => x.Id == trainerInvite.InvitedBy.Id);
+
+                var sportsClubTrainer = new SportsClubTrainer
+                {
+                    SportsClub = sportsClub,
+                    Trainer = trainerInvite.Trainer
+                };
+
+                await _dbContext.SportsClubTrainers.AddAsync(sportsClubTrainer);
+            }
+
+            _dbContext.TrainerInvites.Remove(trainerInvite);
+            await _dbContext.SaveChangesAsync();
 
             return Task.FromResult(true).Result;
         }

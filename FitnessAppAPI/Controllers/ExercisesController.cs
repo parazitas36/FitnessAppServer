@@ -51,14 +51,4 @@ public class ExercisesController : ControllerBase
 
         return isCreated ? Created(nameof(ExerciseGetDto), null) : BadRequest();
     }
-
-    [HttpGet("file/{path}")]
-    public async Task<IActionResult> GetFile(string path)
-    {
-        var ext = path.Contains(".mp4") ? "video/mp4" : "image/jpeg";
-        var dir = new DirectoryInfo("Files");
-        var f = dir.GetFiles().ToList();
-        FileStream stream = System.IO.File.Open(f.First(x => x.FullName.Contains(path)).FullName, FileMode.Open);
-        return File(stream, ext);
-    }
 }

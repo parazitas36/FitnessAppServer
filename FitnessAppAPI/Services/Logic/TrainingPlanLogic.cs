@@ -353,6 +353,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -370,6 +371,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -387,6 +389,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -404,6 +407,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -421,6 +425,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -438,6 +443,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -455,6 +461,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         .Select(tpe => new UserExercisesWithSetsGetDto
                         {
                             ExerciseId = tpe.Exercise.Id,
+                            HasGuide = _dbContext.ExerciseGuides.Any(x => x.Exercise.Id == tpe.Exercise.Id),
                             ExerciseName = tpe.Exercise.Name,
                             MuscleGroups = tpe.Exercise.MuscleGroups,
                             Sets = tpe.Sets,
@@ -497,6 +504,9 @@ public class TrainingPlanLogic : ITrainingPlanLogic
             }
         }
 
+        var uniqueExerciseIds = trainingPlanExercises.Select(x => x.Exercise.Id).Distinct().ToList();
+        var hasGuidesExerciseIds = await _dbContext.ExerciseGuides.Where(x => uniqueExerciseIds.Any(y => y == x.Exercise.Id)).Select(x => x.Exercise.Id).ToListAsync();
+
         weeks = weeks.OrderBy(x => x).ToList();
 
         List<WeeklyPlanWeekGetDto> weeklyPlan = new List<WeeklyPlanWeekGetDto>();
@@ -515,6 +525,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
 
@@ -523,6 +534,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
 
@@ -531,6 +543,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
 
@@ -539,6 +552,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
 
@@ -547,6 +561,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
 
@@ -555,6 +570,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
 
@@ -563,6 +579,7 @@ public class TrainingPlanLogic : ITrainingPlanLogic
                         EditKey = editKey++,
                         TrainingPlanExerciseId = x.Id,
                         ExerciseId = x.Exercise.Id,
+                        HasGuide = hasGuidesExerciseIds.Contains(x.Exercise.Id),
                         Sets = x.Sets
                     }).ToList(),
                 },

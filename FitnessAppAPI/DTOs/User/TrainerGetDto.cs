@@ -10,5 +10,6 @@
         public int ReviewsCount { get; set; } = 0;
         public string? Email { get; set; } = null;
         public string? Phone { get; set; } = null;
+        public bool? IsInvited { get; set; }
     }
 }

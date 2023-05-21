@@ -97,7 +97,7 @@ public class UsersLogic : IUsersLogic
         return true;
     }
 
-    public async Task<List<TrainerGetDto>> GetTrainers()
+    public async Task<List<TrainerGetDto>> GetTrainers(int? sportsClubAdminId = null)
     {
         var trainers = await _dbContext.Users.Where(x => x.Role == Roles.Trainer)
             .Select(x => new TrainerGetDto
@@ -110,12 +110,13 @@ public class UsersLogic : IUsersLogic
                 Phone = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).PhoneNumber,
                 AverageRating = _dbContext.Reviews.Where(y => y.Trainer.Id == x.Id).Average(y => y.Rating),
                 ReviewsCount = _dbContext.Reviews.Count(y => y.Trainer.Id == x.Id),
+                IsInvited = sportsClubAdminId != null ? _dbContext.TrainerInvites.Any(x => x.InvitedBy.Id == sportsClubAdminId) : null,
             }).ToListAsync();
 
         return Task.FromResult(trainers).Result;
     }
 
-    public async Task<TrainerFullInfoGetDto?> GetTrainerInfo(int trainerId)
+    public async Task<TrainerFullInfoGetDto?> GetTrainerInfo(int trainerId, int? sportsClubAdminId = null)
     {
         var trainer = await _dbContext.Users.Where(x => x.Id == trainerId)
             .Select(x => new TrainerFullInfoGetDto
@@ -130,6 +131,7 @@ public class UsersLogic : IUsersLogic
                     Phone = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).PhoneNumber,
                     AverageRating = _dbContext.Reviews.Where(y => y.Trainer.Id == x.Id).Average(y => y.Rating),
                     ReviewsCount = _dbContext.Reviews.Count(y => y.Trainer.Id == x.Id),
+                    IsInvited = sportsClubAdminId != null ? _dbContext.TrainerInvites.Any(y => y.InvitedBy.Id == sportsClubAdminId && y.Trainer.Id == x.Id) : null,
                 },
                 Reviews = _dbContext.Reviews.Include(y => y.CreatedBy).Where(y => y.Trainer.Id == trainerId)
                 .Select(r => new ReviewGetDto
