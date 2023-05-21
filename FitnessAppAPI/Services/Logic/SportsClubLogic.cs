@@ -1,7 +1,9 @@
 ﻿using DataAccess.DatabaseContext;
+using DataAccess.Enumerators;
 using DataAccess.Models.SportsClubModels;
 using FitnessAppAPI.DTOs.Equipment;
 using FitnessAppAPI.DTOs.SportsClub;
+using FitnessAppAPI.DTOs.User;
 using FitnessAppAPI.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -89,7 +91,7 @@ public class SportsClubLogic : ISportsClubLogic
             }).ToListAsync()).Result;
     }
 
-    public async Task<SportsClubGetDto?> GetSportsClubById(int id)
+    public async Task<SportsClubGetDto?> GetSportsClubById(int id, bool full = false)
     {
         var sportsClub = await _dbContext.SportsClubs.Include(x => x.Owner).Include(x => x.Owner.ContactInfo).Where(x => x.Id == id)
             .Select(x => new SportsClubGetDto
@@ -102,7 +104,21 @@ public class SportsClubLogic : ISportsClubLogic
                 TrainersCount = _dbContext.SportsClubTrainers.Where(y => y.SportsClub.Id == x.Id).Count(),
                 FacilitiesCount = _dbContext.Facilities.Where(y => y.SportsClub.Id == x.Id).Count(),
                 PhoneNumber = x.Owner.ContactInfo.PhoneNumber,
-                Email = x.Owner.Email 
+                AverageRating = _dbContext.Reviews.Where(y => y.SportsClub.Id == x.Id).Average(y => y.Rating),
+                ReviewsCount = _dbContext.Reviews.Count(y => y.SportsClub.Id == x.Id),
+                Email = x.Owner.Email,
+                Reviews = _dbContext.Reviews.Include(y => y.CreatedBy).Where(y => y.SportsClub.Id == id)
+                .Select(r => new ReviewGetDto
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                    Review = r.ReviewText,
+                    User = new UserShortGetDto
+                    {
+                        Id = r.CreatedBy.Id,
+                        Username = r.CreatedBy.Username
+                    }
+                }).ToList()
             }).FirstOrDefaultAsync();
 
 
@@ -202,5 +218,23 @@ public class SportsClubLogic : ISportsClubLogic
         {
             return null;
         }
+    }
+
+    public async Task<List<TrainerGetDto>> GetSportsClubTrainers(int sportsClubId)
+    {
+        var trainers = await _dbContext.SportsClubTrainers.Where(x => x.SportsClub.Id == sportsClubId).Select(x => x.Trainer)
+            .Select(x => new TrainerGetDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                LastName = x.Surname,
+                Username = x.Username,
+                Email = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).EmailAddress,
+                Phone = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).PhoneNumber,
+                AverageRating = _dbContext.Reviews.Where(y => y.Trainer.Id == x.Id).Average(y => y.Rating),
+                ReviewsCount = _dbContext.Reviews.Count(y => y.Trainer.Id == x.Id),
+            }).ToListAsync();
+
+        return Task.FromResult(trainers).Result;
     }
 }

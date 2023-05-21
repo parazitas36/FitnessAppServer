@@ -64,7 +64,15 @@ public class SportsClubController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetSportsClubById(int id)
     {
-        var result = await _sportsClubLogic.GetSportsClubById(id);
+        var result = await _sportsClubLogic.GetSportsClubById(id, false);
+
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("{id:int}/full")]
+    public async Task<IActionResult> GetSportsClubByIdFull(int id)
+    {
+        var result = await _sportsClubLogic.GetSportsClubById(id, true);
 
         return result is null ? NotFound() : Ok(result);
     }
@@ -115,5 +123,11 @@ public class SportsClubController : ControllerBase
         var equipment = await _sportsClubLogic.CreateEquipment(sportsClubId, body);
 
         return equipment == null ? BadRequest() : Created(nameof(Equipment), equipment);
+    }
+
+    [HttpGet("{sportsClubId:int}/trainers")]
+    public async Task<IActionResult> GetSportsClubTrainers(int sportsClubId)
+    {
+        return Ok(await _sportsClubLogic.GetSportsClubTrainers(sportsClubId));
     }
 }

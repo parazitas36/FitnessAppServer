@@ -60,4 +60,10 @@ public class FacilityController : ControllerBase
     {
         return Ok(await _facilityLogic.GetFacilityEquipment(facilityId));
     }
+
+    [HttpGet("{facilityId:int}/trainers")]
+    public async Task<IActionResult> GetFacilityTraners(int facilityId)
+    {
+        return Ok(await _facilityLogic.GetFacilityTrainers(facilityId));
+    }
 }

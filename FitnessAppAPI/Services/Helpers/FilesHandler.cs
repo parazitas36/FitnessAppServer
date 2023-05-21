@@ -14,7 +14,8 @@ public static class FilesHandler
 
         var ext = file.ContentType.Contains("image") ? ".jpg" : ".mp4";
 
-        string filePath = $"{Guid.NewGuid().ToString()}${ext}";
+        var guid = Guid.NewGuid().ToString().Replace("-", "").Replace("$", "");
+        string filePath = $"{guid}{ext}";
         using Stream fileStream = new FileStream($"Files/{filePath}", FileMode.Create);
         await file.CopyToAsync(fileStream);
 

@@ -89,6 +89,24 @@ public class FacilityLogic : IFacilityLogic
         }
     }
 
+    public async Task<List<TrainerGetDto>> GetFacilityTrainers(int facilityId)
+    {
+        var trainers = await _dbContext.TrainerFacilities.Where(x => x.Facility.Id == facilityId).Select(x => x.Trainer.Trainer)
+           .Select(x => new TrainerGetDto
+           {
+               Id = x.Id,
+               Name = x.Name,
+               LastName = x.Surname,
+               Username = x.Username,
+               Email = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).EmailAddress,
+               Phone = _dbContext.ContactInfo.FirstOrDefault(y => x.ContactInfo != null && y.Id == x.ContactInfo.Id).PhoneNumber,
+               AverageRating = _dbContext.Reviews.Where(y => y.Trainer.Id == x.Id).Average(y => y.Rating),
+               ReviewsCount = _dbContext.Reviews.Count(y => y.Trainer.Id == x.Id),
+           }).ToListAsync();
+
+        return Task.FromResult(trainers).Result;
+    }
+
     public async Task<bool> AssignEquipmentToFacility(int facilityId, int equipmentId, int amount)
     {
         var equipment = await _dbContext.Equipment.FirstOrDefaultAsync(x => x.Id == equipmentId);
