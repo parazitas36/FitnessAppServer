@@ -12,5 +12,6 @@ namespace FitnessAppAPI.Services.Interfaces
         Task<bool> CreateFacility(FacilityPostDto facility, int sportsClubId, int ownerId);
         Task<List<FacilityGetDto>> GetSportsClubFacilities(int sportsClubId);
         Task<List<TrainerGetDto>> GetFacilityTrainers(int facilityId);
+        Task<bool> AssignTrainerToFacility(int trainerId, int facilityId, int sportsClubAdminId);
     }
 }

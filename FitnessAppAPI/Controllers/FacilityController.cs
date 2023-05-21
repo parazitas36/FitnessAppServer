@@ -61,9 +61,19 @@ public class FacilityController : ControllerBase
         return Ok(await _facilityLogic.GetFacilityEquipment(facilityId));
     }
 
-    [HttpGet("{facilityId:int}/trainers")]
+    [HttpGet("facility/{facilityId:int}/trainers")]
     public async Task<IActionResult> GetFacilityTraners(int facilityId)
     {
         return Ok(await _facilityLogic.GetFacilityTrainers(facilityId));
+    }
+
+    [HttpPost("facility/{facilityId:int}/assign/{trainerId:int}")]
+    [Authorize(Roles = "SportsClubAdmin")]
+    public async Task<IActionResult> AssignTrainerToFacility(int facilityId, int trainerId)
+    {
+        var sportsClubAdminId = JwtHelper.GetUserId(Request);
+        bool result = await _facilityLogic.AssignTrainerToFacility(trainerId, facilityId, sportsClubAdminId);
+
+        return result ? Created("", null) : BadRequest();
     }
 }

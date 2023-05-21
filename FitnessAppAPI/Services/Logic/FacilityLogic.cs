@@ -37,6 +37,40 @@ public class FacilityLogic : IFacilityLogic
         }).ToList());
     }
 
+    public async Task<bool> AssignTrainerToFacility(int trainerId, int facilityId, int sportsClubAdminId)
+    {
+        var facility = await _dbContext.Facilities.FirstOrDefaultAsync(x => x.Id == facilityId && x.SportsClub.Owner.Id == sportsClubAdminId);
+
+        if (facility == null) { return Task.FromResult(false).Result; }
+
+        var trainer = await _dbContext.SportsClubTrainers.Include(x => x.Trainer)
+            .FirstOrDefaultAsync(x => x.Trainer.Id == trainerId && x.SportsClub.Owner.Id == sportsClubAdminId);
+
+        if (trainer == null) { return Task.FromResult(false).Result; }
+
+        var existing = await _dbContext.TrainerFacilities.FirstOrDefaultAsync(x => x.Facility == facility && x.Trainer == trainer);
+
+        if (existing != null) { return Task.FromResult(false).Result; }
+
+        try
+        {
+            var facilityTrainer = new TrainerFacility
+            {
+                Facility = facility,
+                Trainer = trainer
+            };
+
+            await _dbContext.TrainerFacilities.AddAsync(facilityTrainer);
+            await _dbContext.SaveChangesAsync();
+
+            return Task.FromResult(true).Result;
+        }
+        catch
+        {
+            return Task.FromResult(false).Result;
+        }
+    }
+
     public Task<List<EquipmentGetDto>> GetFacilityEquipment(int facilityId)
     {
         return Task.FromResult(_dbContext.FacilitiesEquipment.Include(x => x.Equipment).Where(x => x.Facility.Id == facilityId).Select(x => new EquipmentGetDto
