@@ -39,7 +39,6 @@ public class UsersLogic : IUsersLogic
             },
             Name = user.Name,
             Surname = user.Surname,
-            IsPublicName = user.IsPublicName,
             UsesImperialSystem = user.UsesImperialSystem,
         };
     }
@@ -80,7 +79,6 @@ public class UsersLogic : IUsersLogic
                 Password = passwordHash,
                 ContactInfo = contactInfo,
                 Email = user.Email,
-                IsPublicName = user.IsPublicName,
                 Name = user.Name,
                 Surname = user.Surname,
                 Role = Enum.TryParse<Roles>(user.Role.ToString(), out Roles role) ? role : Roles.User,

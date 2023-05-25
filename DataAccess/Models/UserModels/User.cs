@@ -35,9 +35,6 @@ public class User : Entity
     [StringLength(50)]
     public string Surname { get; set; }
 
-    [Required]
-    public bool IsPublicName { get; set; } = false;
-
     [StringLength(50)]
     public string? ProfilePictureURI { get; set; }
 }

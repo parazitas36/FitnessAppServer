@@ -87,6 +87,8 @@ public class SportsClubLogic : ISportsClubLogic
                 TrainersCount = _dbContext.SportsClubTrainers.Where(y => y.SportsClub.Id == x.Id).Count(),
                 FacilitiesCount = _dbContext.Facilities.Where(y => y.SportsClub.Id == x.Id).Count(),
                 PhoneNumber = x.Owner.ContactInfo.PhoneNumber,
+                AverageRating = _dbContext.Reviews.Where(y => y.SportsClub.Id == x.Id).Average(y => y.Rating),
+                ReviewsCount = _dbContext.Reviews.Count(y => y.SportsClub.Id == x.Id),
                 Email = x.Owner.Email
             }).ToListAsync()).Result;
     }

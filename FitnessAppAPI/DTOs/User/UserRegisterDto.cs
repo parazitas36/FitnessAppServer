@@ -22,6 +22,4 @@ public class UserRegisterDto
     public string Name { get; set; }
 
     public string Surname { get; set; }
-
-    public bool IsPublicName { get; set; } = false;
 }

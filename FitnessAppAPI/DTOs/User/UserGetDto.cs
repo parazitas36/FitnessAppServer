@@ -11,8 +11,6 @@ public class UserGetDto
     public string? Name { get; set; }
 
     public string? Surname { get; set; }
-    
-    public bool IsPublicName { get; set; }
 
     public bool UsesImperialSystem { get; set; }
 
