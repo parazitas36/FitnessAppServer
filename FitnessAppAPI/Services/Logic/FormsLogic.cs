@@ -112,6 +112,18 @@ public class FormsLogic : IFormsLogic
         return Task.FromResult(result).Result;
     }
 
+    public async Task<List<BodyMeasurementsGetDto>> GetClientBodyMeasurements(int trainerId, int clientId)
+    {
+        var clientTrainer = await _dbContext.ClientTrainingPlans.FirstOrDefaultAsync(x => x.TrainingPlan.CreatedBy.Id == trainerId && x.Client.Id == clientId);
+
+        if (clientTrainer == null)
+        {
+            return Enumerable.Empty<BodyMeasurementsGetDto>().ToList();
+        }
+
+        return Task.FromResult(await this.GetBodyMeasurements(clientId)).Result;
+    }
+
     public async Task<List<TrainingPlanFormGetDto>> GetUsersTrainingPlanForms(int userId)
     {
         var result = await _dbContext.TrainingPlanForms.Include(x => x.CreatedBy)

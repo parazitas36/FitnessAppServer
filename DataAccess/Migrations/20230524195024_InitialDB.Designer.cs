@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(FitnessAppDbContext))]
-    [Migration("20230509204031_RemoveLoggedSetsLimit")]
-    partial class RemoveLoggedSetsLimit
+    [Migration("20230524195024_InitialDB")]
+    partial class InitialDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DataAccess.Models.FormsModels.JobOffer", b =>
+            modelBuilder.Entity("DataAccess.Models.FormsModels.TrainerInvite", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,73 +33,25 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<DateTime>("OfferDate")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SportsClubId")
+                    b.Property<int>("InvitedById")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<int>("TrainerJobFormId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SportsClubId");
-
-                    b.HasIndex("TrainerJobFormId");
-
-                    b.ToTable("JobOffer");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.FormsModels.TrainerJobForm", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Education")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("OtherDetails")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("PersonalAchievements")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("TrainerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InvitedById");
+
                     b.HasIndex("TrainerId");
 
-                    b.ToTable("TrainerJobForm");
+                    b.ToTable("TrainerInvite");
                 });
 
             modelBuilder.Entity("DataAccess.Models.FormsModels.TrainingPlanForm", b =>
@@ -414,13 +366,13 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("MuscleGroups")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -680,9 +632,6 @@ namespace DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsPublicName")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -720,32 +669,21 @@ namespace DataAccess.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.FormsModels.JobOffer", b =>
+            modelBuilder.Entity("DataAccess.Models.FormsModels.TrainerInvite", b =>
                 {
-                    b.HasOne("DataAccess.Models.SportsClubModels.SportsClub", "SportsClub")
+                    b.HasOne("DataAccess.Models.SportsClubModels.SportsClub", "InvitedBy")
                         .WithMany()
-                        .HasForeignKey("SportsClubId")
+                        .HasForeignKey("InvitedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DataAccess.Models.FormsModels.TrainerJobForm", "TrainerJobForm")
-                        .WithMany()
-                        .HasForeignKey("TrainerJobFormId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SportsClub");
-
-                    b.Navigation("TrainerJobForm");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.FormsModels.TrainerJobForm", b =>
-                {
                     b.HasOne("DataAccess.Models.UserModels.User", "Trainer")
                         .WithMany()
                         .HasForeignKey("TrainerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("InvitedBy");
 
                     b.Navigation("Trainer");
                 });

@@ -17,5 +17,6 @@ namespace FitnessAppAPI.Services.Interfaces
         Task<bool> PostTrainerInvite(int sportsClubAdminId, int trainerId);
         Task<List<TrainerInviteGetDto>> GetTrainerInvites(int trainerId);
         Task<bool> ChangeTrainerInviteStatus(int trainerId, int trainerInviteId, OfferStatus status);
+        Task<List<BodyMeasurementsGetDto>> GetClientBodyMeasurements(int trainerId, int clientId);
     }
 }

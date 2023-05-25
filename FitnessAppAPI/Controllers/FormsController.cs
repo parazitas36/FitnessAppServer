@@ -29,6 +29,15 @@ namespace FitnessAppAPI.Controllers
             return Ok(await _formsLogic.GetBodyMeasurements(userId));
         }
 
+        [HttpGet("bodymeasurements/client/{clientId:int}")]
+        [Authorize(Roles = "Trainer")]
+        public async Task<IActionResult> GetClientBodyMeasureMents(int clientId)
+        {
+            var trainerId = JwtHelper.GetUserId(Request);
+
+            return Ok(await _formsLogic.GetClientBodyMeasurements(trainerId, clientId));
+        }
+
         [HttpPost("bodymeasurements")]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> PostBodyMeasurements([FromForm] BodyMeasurementsPostDto dto)

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDb : Migration
+    public partial class InitialDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,7 +39,6 @@ namespace DataAccess.Migrations
                     UsesImperialSystem = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    IsPublicName = table.Column<bool>(type: "bit", nullable: false),
                     ProfilePictureURI = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
@@ -59,10 +58,12 @@ namespace DataAccess.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    Weight = table.Column<double>(type: "float", nullable: true),
-                    Bust = table.Column<double>(type: "float", nullable: true),
+                    Height = table.Column<double>(type: "float", nullable: false),
+                    Weight = table.Column<double>(type: "float", nullable: false),
+                    Shoulders = table.Column<double>(type: "float", nullable: true),
+                    Chest = table.Column<double>(type: "float", nullable: true),
                     Waist = table.Column<double>(type: "float", nullable: true),
-                    Hip = table.Column<double>(type: "float", nullable: true),
+                    Hips = table.Column<double>(type: "float", nullable: true),
                     MeasurementDay = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ImperialSystem = table.Column<bool>(type: "bit", nullable: false),
                     ImageUri = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -116,31 +117,6 @@ namespace DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_SportsClub_User_OwnerId",
                         column: x => x.OwnerId,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TrainerJobForm",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TrainerId = table.Column<int>(type: "int", nullable: false),
-                    Education = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    PersonalAchievements = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    Country = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    OtherDetails = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TrainerJobForm", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TrainerJobForm_User_TrainerId",
-                        column: x => x.TrainerId,
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -218,6 +194,7 @@ namespace DataAccess.Migrations
                     SportsClubId = table.Column<int>(type: "int", nullable: false),
                     Country = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     ImageUri = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
@@ -320,30 +297,29 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "JobOffer",
+                name: "TrainerInvite",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    TrainerJobFormId = table.Column<int>(type: "int", nullable: false),
-                    SportsClubId = table.Column<int>(type: "int", nullable: false),
-                    Details = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    InvitedById = table.Column<int>(type: "int", nullable: false),
+                    TrainerId = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    OfferDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_JobOffer", x => x.Id);
+                    table.PrimaryKey("PK_TrainerInvite", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_JobOffer_SportsClub_SportsClubId",
-                        column: x => x.SportsClubId,
+                        name: "FK_TrainerInvite_SportsClub_InvitedById",
+                        column: x => x.InvitedById,
                         principalTable: "SportsClub",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_JobOffer_TrainerJobForm_TrainerJobFormId",
-                        column: x => x.TrainerJobFormId,
-                        principalTable: "TrainerJobForm",
+                        name: "FK_TrainerInvite_User_TrainerId",
+                        column: x => x.TrainerId,
+                        principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -412,8 +388,8 @@ namespace DataAccess.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedById = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    MuscleGroups = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    MuscleGroups = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     ExerciseType = table.Column<int>(type: "int", nullable: false),
                     EquipmentId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -543,7 +519,7 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TrainingPlanExerciseId = table.Column<int>(type: "int", nullable: false),
                     CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LoggedSets = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    LoggedSets = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -617,16 +593,6 @@ namespace DataAccess.Migrations
                 column: "FacilityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JobOffer_SportsClubId",
-                table: "JobOffer",
-                column: "SportsClubId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_JobOffer_TrainerJobFormId",
-                table: "JobOffer",
-                column: "TrainerJobFormId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PasswordReset_UserId",
                 table: "PasswordReset",
                 column: "UserId");
@@ -677,8 +643,13 @@ namespace DataAccess.Migrations
                 column: "TrainerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TrainerJobForm_TrainerId",
-                table: "TrainerJobForm",
+                name: "IX_TrainerInvite_InvitedById",
+                table: "TrainerInvite",
+                column: "InvitedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrainerInvite_TrainerId",
+                table: "TrainerInvite",
                 column: "TrainerId");
 
             migrationBuilder.CreateIndex(
@@ -736,9 +707,6 @@ namespace DataAccess.Migrations
                 name: "FacilityEquipment");
 
             migrationBuilder.DropTable(
-                name: "JobOffer");
-
-            migrationBuilder.DropTable(
                 name: "PasswordReset");
 
             migrationBuilder.DropTable(
@@ -751,13 +719,13 @@ namespace DataAccess.Migrations
                 name: "TrainerFacility");
 
             migrationBuilder.DropTable(
+                name: "TrainerInvite");
+
+            migrationBuilder.DropTable(
                 name: "TrainingPlanOffer");
 
             migrationBuilder.DropTable(
                 name: "TrainingPlan_Exercise");
-
-            migrationBuilder.DropTable(
-                name: "TrainerJobForm");
 
             migrationBuilder.DropTable(
                 name: "Facility");
