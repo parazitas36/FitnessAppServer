@@ -365,3 +365,6 @@ FodyWeavers.xsd
 /FitnessAppAPI/appsettings.json
 /FitnessAppAPI/Properties/launchSettings.json
 /FitnessAppAPI/Files
+/FitnessAppAPI/.config
+/FitnessAppAPI/Properties/ServiceDependencies/FitnessAppAPIBakalauras - Web Deploy
+*.json
