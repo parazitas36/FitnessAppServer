@@ -194,6 +194,14 @@ public class SportsClubLogic : ISportsClubLogic
         return Task.FromResult(_dbContext.Equipment.Where(x => x.SportsClub.Id == sportsClubId).ToList()).Result;
     }
 
+    public async Task<List<Equipment>> GetTrainersEquipment(int trainerId)
+    {
+        var trainerSportsClubsId = await _dbContext.SportsClubTrainers.Include(x => x.SportsClub).Where(x => x.Trainer.Id == trainerId).Select(x => x.SportsClub.Id).ToListAsync();
+        var result = await _dbContext.Equipment.Where(x => trainerSportsClubsId.Any(y => y == x.SportsClub.Id)).ToListAsync();
+
+        return Task.FromResult(result).Result;
+    }
+
     public async Task<Equipment> CreateEquipment(int sportsClubId, EquipmentPostDto equipment)
     {
         var sportsClub = await _dbContext.SportsClubs.FirstOrDefaultAsync(x => x.Id == sportsClubId);

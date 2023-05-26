@@ -15,4 +15,6 @@ public class UserGetDto
     public bool UsesImperialSystem { get; set; }
 
     public ContactInfoDto? ContactInfo { get; set; }
+
+    public bool? IsWorkingInSportsClub { get; set; }
 }

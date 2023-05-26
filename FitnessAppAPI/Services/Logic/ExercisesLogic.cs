@@ -85,24 +85,6 @@ public class ExercisesLogic : IExercisesLogic
         {
             return null;
         }
-
-        //return Task.FromResult(_dbContext.ExerciseGuides.Where(x => x.Exercise.CreatedBy.Id == userId).Include(x => x.Exercise).Include(x => x.Exercise.Equipment)
-        //    .Select(x => new ExerciseGetDto
-        //    {
-        //        CreatedBy = userId,
-        //        Equipment = x.Exercise.Equipment != null ? new Equipment
-        //        {
-        //            Id = x.Exercise.Equipment.Id,
-        //            Description = x.Exercise.Equipment.Description,
-        //            ImageURI = x.Exercise.Equipment.ImageURI,
-        //            Name = x.Exercise.Equipment.Name
-        //        } : null,
-        //        Name = x.Exercise.Name,
-        //        ExerciseType = x.Exercise.ExerciseType.ToString(),
-        //        Id = x.Id,
-        //        MuscleGroups = x.Exercise.MuscleGroups,
-        //        HasGuide = !string.IsNullOrEmpty(x.Guide)
-        //    }).ToList()).Result;
     }
 
     public async Task<bool> CreateExercise(int userId, ExerciseWithGuidePostDto exerciseDto)

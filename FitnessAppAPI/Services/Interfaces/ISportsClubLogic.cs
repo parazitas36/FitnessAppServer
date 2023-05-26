@@ -16,5 +16,6 @@ namespace FitnessAppAPI.Services.Logic
         Task<List<Equipment>> GetSportsClubEquipment(int sportsClubId);
         Task<Equipment> CreateEquipment(int sportsClubId, EquipmentPostDto equipment);
         Task<List<TrainerGetDto>> GetSportsClubTrainers(int sportsClubId);
+        Task<List<Equipment>> GetTrainersEquipment(int trainerId);
     }
 }

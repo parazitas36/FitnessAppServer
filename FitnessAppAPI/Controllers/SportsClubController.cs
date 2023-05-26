@@ -109,7 +109,17 @@ public class SportsClubController : ControllerBase
         return Ok(equipment);
     }
 
+    [HttpGet("trainer/equipment")]
+    public async Task<IActionResult> GetTrainerEquipment()
+    {
+        var trainerId = JwtHelper.GetUserId(Request);
+        var result = await _sportsClubLogic.GetTrainersEquipment(trainerId);
+
+        return Ok(result);
+    }
+
     [HttpPost("{sportsClubId:int}/equipment")]
+    [Authorize(Roles = "SportsClubAdmin")]
     public async Task<ActionResult<Equipment>> CreateEquipment([FromForm] EquipmentPostDto body, int sportsClubId)
     {
         var sportsClub = await _sportsClubLogic.GetSportsClubById(sportsClubId);

@@ -40,6 +40,7 @@ public class UsersLogic : IUsersLogic
             Name = user.Name,
             Surname = user.Surname,
             UsesImperialSystem = user.UsesImperialSystem,
+            IsWorkingInSportsClub = user.Role == Roles.Trainer && _dbContext.SportsClubTrainers.Count(x => x.Trainer.Id == user.Id) > 0,
         };
     }
 
