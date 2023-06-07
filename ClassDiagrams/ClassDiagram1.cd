@@ -17,7 +17,7 @@
     <TypeIdentifier />
   </Class>
   <Class Name="FitnessAppAPI.Controllers.ProgressController">
-    <Position X="9.25" Y="0.75" Width="2.25" />
+    <Position X="9.25" Y="0.75" Width="2" />
     <TypeIdentifier />
   </Class>
   <Class Name="FitnessAppAPI.Controllers.SportsClubController">
@@ -33,70 +33,70 @@
     <TypeIdentifier />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.ExercisesLogic">
-    <Position X="18" Y="4.75" Width="1.75" />
+    <Position X="18" Y="9" Width="1.75" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FitnessAppAPI.Services.Helpers.FilesHandler">
-    <Position X="11.75" Y="8.5" Width="1.5" />
+    <Position X="11.75" Y="9" Width="1.5" />
     <TypeIdentifier />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.FacilityLogic">
-    <Position X="1" Y="5.5" Width="2" />
+    <Position X="1" Y="9" Width="2.25" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.FormsLogic">
-    <Position X="3.25" Y="8" Width="2.25" />
+    <Position X="3.5" Y="9" Width="2.25" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.TrainingPlanLogic">
-    <Position X="5.75" Y="8.25" Width="2.75" />
+    <Position X="6.25" Y="9" Width="2.75" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.UsersLogic">
-    <Position X="16" Y="6" Width="1.75" />
+    <Position X="15.75" Y="9" Width="2" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.SportsClubLogic">
-    <Position X="13.5" Y="7" Width="2" />
+    <Position X="13.5" Y="9" Width="2" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="FitnessAppAPI.Services.Logic.ProgressLogic">
-    <Position X="9.25" Y="3.75" Width="2.25" />
+    <Position X="9.25" Y="9" Width="2.25" />
     <TypeIdentifier />
     <Lollipop Position="0.2" />
   </Class>
   <Interface Name="FitnessAppAPI.Services.Interfaces.IExercisesLogic">
-    <Position X="18" Y="2.75" Width="1.75" />
+    <Position X="18" Y="4.75" Width="1.75" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="FitnessAppAPI.Services.Interfaces.IFacilityLogic">
-    <Position X="1" Y="3.25" Width="2" />
+    <Position X="1" Y="4.75" Width="2.25" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="FitnessAppAPI.Services.Interfaces.IFormsLogic">
-    <Position X="3.5" Y="4.5" Width="2" />
+    <Position X="3.5" Y="4.75" Width="2.25" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="FitnessAppAPI.Services.Interfaces.IProgressLogic">
-    <Position X="9.25" Y="2.25" Width="2" />
+    <Position X="9.25" Y="4.75" Width="2.25" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="FitnessAppAPI.Services.Interfaces.ITrainingPlanLogic">
-    <Position X="6.25" Y="4.25" Width="2.25" />
+    <Position X="6.25" Y="4.75" Width="2.75" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="FitnessAppAPI.Services.Interfaces.IUsersLogic">
-    <Position X="15.75" Y="3.5" Width="2" />
+    <Position X="15.75" Y="4.75" Width="2" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="FitnessAppAPI.Services.Logic.ISportsClubLogic">
-    <Position X="13.5" Y="4" Width="2" />
+    <Position X="13.5" Y="4.75" Width="2" />
     <TypeIdentifier />
   </Interface>
   <Font Name="Segoe UI" Size="9" />
